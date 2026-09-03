@@ -1,57 +1,94 @@
 import { router } from "./router.js";
 import { loadState } from "./storage.js";
 import { registerUser } from "./auth.js";
+import { loginUser } from "./auth.js";
+import { renderNavbar } from "./ui.js";
+import { logoutUser } from "./auth.js";
 
 const app = document.querySelector("#app");
 
 function render() {
+    document.querySelector("#navbar").innerHTML = renderNavbar();
     app.innerHTML = router();
 }
 
 document.addEventListener("click", (event) => {
+
     const link = event.target.closest("[data-link]");
 
-    if (!link) {
+    if (link) {
+        event.preventDefault();
+
+        const url = link.getAttribute("href");
+
+        window.history.pushState({}, "", url);
+
+        render();
         return;
     }
 
-    event.preventDefault();
+    if (event.target.id === "logout-button") {
+        logoutUser();
 
-    const url = link.getAttribute("href");
-
-    window.history.pushState({}, "", url);
-
-    render();
+        window.history.pushState({}, "", "/");
+        render();
+    }
 });
-
 document.addEventListener("submit", (event) => {
 
-    if (event.target.id !== "register-form") {
-        return;
+    if (event.target.id === "register-form") {
+        event.preventDefault();
+
+        const form = event.target;
+
+        const email = form.querySelector("#email").value.trim();
+        const phone = form.querySelector("#phone").value.trim();
+        const password = form.querySelector("#password").value;
+
+        const result = registerUser({
+            email,
+            phone,
+            password
+        });
+
+        const message = document.querySelector("#register-message");
+
+        if (!result.success) {
+            message.textContent = result.message;
+            return;
+        }
+
+        message.textContent = "Registration successful!";
     }
 
-    event.preventDefault();
 
-    const form = event.target;
+    //LOGIN
+    if (event.target.id === "login-form") {
 
-    const email = form.querySelector("#email").value.trim();
-    const phone = form.querySelector("#phone").value.trim();
-    const password = form.querySelector("#password").value;
+        event.preventDefault();
 
-    const result = registerUser({
-        email,
-        phone,
-        password
-    });
+        const form = event.target;
 
-    const message = document.querySelector("#register-message");
+        const email = form.querySelector("#login-email").value.trim();
+        const phone = form.querySelector("#login-phone").value.trim();
+        const password = form.querySelector("#login-password").value;
 
-    if (!result.success) {
-        message.textContent = result.message;
-        return;
+        const result = loginUser({
+            email,
+            phone,
+            password
+        });
+
+        const message = document.querySelector("#login-message");
+
+        if (!result.success) {
+            message.textContent = result.message;
+            return;
+        }
+
+        window.history.pushState({}, "", "/");
+        render();
     }
-
-    message.textContent = "Registration successful!";
 });
 
 

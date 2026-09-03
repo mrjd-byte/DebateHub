@@ -1,3 +1,5 @@
+import { state } from "./state.js";
+
 export function renderHome() {
     return `
         <h1>Welcome to Debate Platform</h1>
@@ -8,7 +10,29 @@ export function renderHome() {
 export function renderLogin() {
     return `
         <h1>Login</h1>
-        <p>Login page coming soon.</p>
+
+        <form id="login-form">
+
+            <label>
+                Email
+                <input type="email" id="login-email">
+            </label>
+
+            <label>
+                Phone
+                <input type="tel" id="login-phone">
+            </label>
+
+            <label>
+                Password
+                <input type="password" id="login-password">
+            </label>
+
+            <button type="submit">Login</button>
+
+            <p id="login-message"></p>
+
+        </form>
     `;
 }
 
@@ -73,6 +97,25 @@ export function renderNotFound() {
     return `
         <h1>404</h1>
         <p>Page not found.</p>
+    `;
+}
+
+export function renderNavbar() { //MAKING NAVBAR DYNAMIC DIFFERENT FOR LOGIN AND REGISTER
+
+    if (state.auth.isAuthenticated) {
+        return `
+            <a href="/" data-link>Home</a>
+            <a href="/search" data-link>Search</a>
+            <a href="/profile" data-link>Profile</a>
+            <button id="logout-button">Logout</button>
+        `;
+    }
+
+    return `
+        <a href="/" data-link>Home</a>
+        <a href="/search" data-link>Search</a>
+        <a href="/login" data-link>Login</a>
+        <a href="/register" data-link>Register</a>
     `;
 }
 // router.js

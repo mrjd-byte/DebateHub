@@ -45,3 +45,52 @@ export function registerUser({ email, phone, password }) {
         user
     };
 }
+
+export function loginUser({ email, phone, password }) {
+
+    if (!email && !phone) {
+        return {
+            success: false,
+            message: "Email or phone is required."
+        };
+    }
+
+    if (!password) {
+        return {
+            success: false,
+            message: "Password is required."
+        };
+    }
+
+    const user = state.appData.users.find(user =>
+        (
+            (email && user.email === email) ||
+            (phone && user.phone === phone)
+        ) &&
+        user.password === password
+    );
+
+    if (!user) {
+        return {
+            success: false,
+            message: "Invalid credentials."
+        };
+    }
+
+    state.auth.isAuthenticated = true;
+    state.auth.currentUser = user;
+
+    saveState();
+
+    return {
+        success: true,
+        user
+    };
+}
+
+export function logoutUser() {
+    state.auth.isAuthenticated = false;
+    state.auth.currentUser = null;
+
+    saveState();
+}
