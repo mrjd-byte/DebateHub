@@ -1,3 +1,5 @@
+import { state } from "./state.js";
+
 import {
     renderHome,
     renderLogin,
@@ -9,6 +11,13 @@ import {
     renderNotFound
 } from "./ui.js";
 
+function requireAuth(view) {
+    if (!state.auth.isAuthenticated) {
+        return renderLogin();
+    }
+
+    return view();
+}
 
 export function router() {
     const path = window.location.pathname;
@@ -20,7 +29,7 @@ export function router() {
         return renderLogin();
 
     } else if (path === "/profile") {
-        return renderProfile();
+        return requireAuth(renderProfile);
 
     } else if (path === "/search") {
         return renderSearch();
@@ -29,8 +38,8 @@ export function router() {
         return renderRegister();
 
     } else if (path === "/create") {
-        return renderCreateDebate();
-
+        return requireAuth(renderCreateDebate);
+        
     } else if (path.startsWith("/debate/")) {
 
         const parts = path.split("/");
@@ -50,7 +59,7 @@ export function router() {
 //    ↓
 // directly changes DOM
 
-// Now 
+// Now
 // router()
 //    ↓
 // returns HTML
