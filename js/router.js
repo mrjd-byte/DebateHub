@@ -39,11 +39,11 @@ export function router() {
 
     } else if (path === "/create") {
         return requireAuth(renderCreateDebate);
-        
+
     } else if (path.startsWith("/debate/")) {
 
         const parts = path.split("/");
-        const debateId = Number(parts[2]);
+        const debateId = parts[2];
 
         return renderDebate(debateId);
 

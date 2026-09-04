@@ -118,9 +118,34 @@ export function renderCreateDebate() {
 }
 
 export function renderDebate(debateId) {
+
+    const debate = state.appData.debates.find(
+        debate => debate.id === debateId
+    );
+
+    if (!debate) {
+        return `
+            <h1>Debate Not Found</h1>
+            <p>The debate you're looking for does not exist.</p>
+        `;
+    }
+
     return `
-        <h1>Debate Details</h1>
-        <p>Debate ID: ${debateId}</p>
+        <article>
+            <h1>${debate.title}</h1>
+
+            <p>${debate.description}</p>
+
+            <p>
+                <strong>Topic:</strong>
+                ${debate.topic}
+            </p>
+
+            <div>
+                <strong>Tags:</strong>
+                ${debate.tags.map(tag => `<span>${tag}</span>`).join(" ")}
+            </div>
+        </article>
     `;
 }
 
@@ -136,7 +161,7 @@ export function renderNavbar() { //MAKING NAVBAR DYNAMIC DIFFERENT FOR LOGIN AND
     if (state.auth.isAuthenticated) {
         return `
             <a href="/" data-link>Home</a>
-            <a href="/search" data-link>Search</a>
+            <a href="/create" data-link>new debate</a>
             <a href="/profile" data-link>Profile</a>
             <button id="logout-button">Logout</button>
         `;
