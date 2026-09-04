@@ -1,9 +1,37 @@
 import { state } from "./state.js";
+import { getPositionStats } from "./positions.js";
 
 export function renderHome() {
+
+    const debates = state.appData.debates;
+
     return `
-        <h1>Welcome to Debate Platform</h1>
+        <h1>Debate Platform</h1>
         <p>Explore debates and different perspectives.</p>
+
+        <section>
+            <h2>Available Debates</h2>
+
+            ${
+                debates.length === 0
+                    ? "<p>No debates yet.</p>"
+                    : debates.map(debate => `
+                        <article>
+                            <h3>
+                                <a href="/debate/${debate.id}" data-link>
+                                    ${debate.title}
+                                </a>
+                            </h3>
+
+                            <p>${debate.description}</p>
+
+                            <p>
+                                Topic: ${debate.topic}
+                            </p>
+                        </article>
+                    `).join("")
+            }
+        </section>
     `;
 }
 
@@ -130,6 +158,8 @@ export function renderDebate(debateId) {
         `;
     }
 
+    const stats = getPositionStats(debateId);
+
     return `
         <article>
             <h1>${debate.title}</h1>
@@ -144,6 +174,20 @@ export function renderDebate(debateId) {
             <div>
                 <strong>Tags:</strong>
                 ${debate.tags.map(tag => `<span>${tag}</span>`).join(" ")}
+            </div>
+            <div>
+                <button data-position="support">Support</button>
+                <button data-position="oppose">Oppose</button>
+                <button data-position="undecided">Undecided</button>
+            </div>
+            <div>
+                <h3>Current Positions</h3>
+
+                <p>Support: ${stats.supportPercentage}% (${stats.support})</p>
+
+                <p>Oppose: ${stats.opposePercentage}% (${stats.oppose})</p>
+
+                <p>Undecided: ${stats.undecidedPercentage}% (${stats.undecided})</p>
             </div>
         </article>
     `;
