@@ -82,7 +82,38 @@ export function renderRegister() {
 export function renderCreateDebate() {
     return `
         <h1>Create Debate</h1>
-        <p>Create debate page coming soon.</p>
+
+        <form id="create-debate-form">
+
+            <label>
+                Title
+                <input type="text" id="debate-title">
+            </label>
+
+            <label>
+                Description
+                <textarea id="debate-description"></textarea>
+            </label>
+
+            <label>
+                Topic
+                <input type="text" id="debate-topic">
+            </label>
+
+            <label>
+                Tags
+                <input
+                    type="text"
+                    id="debate-tags"
+                    placeholder="AI, Technology, Jobs"
+                >
+            </label>
+
+            <button type="submit">Create Debate</button>
+
+            <p id="debate-message"></p>
+
+        </form>
     `;
 }
 

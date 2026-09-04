@@ -4,6 +4,7 @@ import { registerUser } from "./auth.js";
 import { loginUser } from "./auth.js";
 import { renderNavbar } from "./ui.js";
 import { logoutUser } from "./auth.js";
+import { createDebate } from "./debates.js";
 
 const app = document.querySelector("#app");
 
@@ -89,6 +90,47 @@ document.addEventListener("submit", (event) => {
         window.history.pushState({}, "", "/");
         render();
     }
+
+    //debate-form
+    if (event.target.id === "create-debate-form") {
+
+    event.preventDefault();
+
+    const form = event.target;
+
+    const title = form.querySelector("#debate-title").value.trim();
+    const description = form.querySelector("#debate-description").value.trim();
+    const topic = form.querySelector("#debate-topic").value.trim();
+
+    const tags = form
+        .querySelector("#debate-tags")
+        .value
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(tag => tag !== "");
+
+    const result = createDebate({
+        title,
+        description,
+        topic,
+        tags
+    });
+
+    const message = document.querySelector("#debate-message");
+
+    if (!result.success) {
+        message.textContent = result.message;
+        return;
+    }
+
+    window.history.pushState(
+        {},
+        "",
+        `/debate/${result.debate.id}`
+    );
+
+    render();
+}
 });
 
 
@@ -98,7 +140,7 @@ window.addEventListener("popstate", () => {
 
 loadState();
 
-render();
+render();   
 
 //[data-link] is a CSS selector meaning: Find an element that has a data-link attribute.
 //event.target is the elemnet that was actually clicked
