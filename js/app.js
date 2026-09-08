@@ -7,6 +7,8 @@ import { logoutUser } from "./auth.js";
 import { createDebate } from "./debates.js";
 import { setPosition } from "./positions.js";
 import { createArgument } from "./arguments.js";
+import { voteOnArgument } from "./votes.js";
+
 
 const app = document.querySelector("#app");
 
@@ -56,7 +58,26 @@ document.addEventListener("click", (event) => {
 
         render();
     }
+
+    //voting in arguments
+    const voteButton = event.target.closest("[data-vote]");
+
+    if (voteButton) {
+
+        const value = voteButton.dataset.vote;
+        const argumentId = voteButton.dataset.argumentId;
+
+        const result = voteOnArgument(argumentId, value);
+
+        if (!result.success) {
+            console.log(result.message);
+            return;
+        }
+
+        render();
+    }
 });
+
 document.addEventListener("submit", (event) => {
 
     if (event.target.id === "register-form") {
@@ -157,39 +178,39 @@ document.addEventListener("submit", (event) => {
     //Argument form
     if (event.target.id === "argument-form") {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    const form = event.target;
+        const form = event.target;
 
-    const content = form
-        .querySelector("#argument-content")
-        .value
-        .trim();
+        const content = form
+            .querySelector("#argument-content")
+            .value
+            .trim();
 
-    const side = form
-        .querySelector("#argument-side")
-        .value;
+        const side = form
+            .querySelector("#argument-side")
+            .value;
 
-    const parts = window.location.pathname.split("/");
-    const debateId = parts[2];
+        const parts = window.location.pathname.split("/");
+        const debateId = parts[2];
 
-    const result = createArgument({
-        debateId,
-        side,
-        content
-    });
+        const result = createArgument({
+            debateId,
+            side,
+            content
+        });
 
-    const message = document.querySelector("#argument-message");
+        const message = document.querySelector("#argument-message");
 
-    if (!result.success) {
-        message.textContent = result.message;
-        return;
+        if (!result.success) {
+            message.textContent = result.message;
+            return;
+        }
+
+        message.textContent = "Argument submitted!";
+
+        render();
     }
-
-    message.textContent = "Argument submitted!";
-
-    render();
-}
 });
 
 

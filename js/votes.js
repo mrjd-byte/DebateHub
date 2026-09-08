@@ -64,3 +64,26 @@ export function voteOnArgument(argumentId, value) {
         success: true
     };
 }
+
+export function getArgumentVoteStats(argumentId) {
+
+    // Get only the votes belonging to this argument
+    const argumentVotes = state.appData.votes.filter(
+        vote => vote.argumentId === argumentId
+    );
+
+    // Count how many users upvoted
+    const upvotes = argumentVotes.filter(
+        vote => vote.value === "up"
+    ).length;
+
+    // Count how many users downvoted
+    const downvotes = argumentVotes.filter(
+        vote => vote.value === "down"
+    ).length;
+
+    return {
+        upvotes,
+        downvotes
+    };
+}

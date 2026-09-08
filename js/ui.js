@@ -1,5 +1,6 @@
 import { state } from "./state.js";
 import { getPositionStats } from "./positions.js";
+import { getArgumentVoteStats } from "./votes.js";
 
 export function renderHome() {
 
@@ -213,29 +214,67 @@ export function renderDebate(debateId) {
             <section>
                 <h2>Supporting Arguments</h2>
 
-                ${
-                    supportArguments.length === 0
-                        ? "<p>No supporting arguments yet.</p>"
-                        : supportArguments.map(argument => `
-                            <article>
-                                <p>${argument.content}</p>
-                                       </article>
-                        `).join("")
-                }
+                ${supportArguments.length === 0
+            ? "<p>No supporting arguments yet.</p>"
+            : supportArguments.map(argument => {
+
+    const votes = getArgumentVoteStats(argument.id);
+
+    return `
+        <article>
+            <p>${argument.content}</p>
+
+            <button
+                data-vote="up"
+                data-argument-id="${argument.id}"
+            >
+                ↑ ${votes.upvotes}
+            </button>
+
+            <button
+                data-vote="down"
+                data-argument-id="${argument.id}"
+            >
+                ↓ ${votes.downvotes}
+            </button>
+        </article>
+    `;
+
+}).join("")
+        }
             </section>
                         
             <section>
                 <h2>Opposing Arguments</h2>
 
-                ${
-                    opposeArguments.length === 0
-                        ? "<p>No opposing arguments yet.</p>"
-                        : opposeArguments.map(argument => `
-                            <article>
-                                <p>${argument.content}</p>
-                            </article>
-                        `).join("")
-                }
+                ${opposeArguments.length === 0
+            ? "<p>No opposing arguments yet.</p>"
+            : opposeArguments.map(argument => {
+
+    const votes = getArgumentVoteStats(argument.id);
+
+    return `
+        <article>
+            <p>${argument.content}</p>
+
+            <button
+                data-vote="up"
+                data-argument-id="${argument.id}"
+            >
+                ↑ ${votes.upvotes}
+            </button>
+
+            <button
+                data-vote="down"
+                data-argument-id="${argument.id}"
+            >
+                ↓ ${votes.downvotes}
+            </button>
+        </article>
+    `;
+
+}).join("")
+        }
             </section>
 
 
