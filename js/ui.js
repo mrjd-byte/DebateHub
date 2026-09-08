@@ -12,10 +12,9 @@ export function renderHome() {
         <section>
             <h2>Available Debates</h2>
 
-            ${
-                debates.length === 0
-                    ? "<p>No debates yet.</p>"
-                    : debates.map(debate => `
+            ${debates.length === 0
+            ? "<p>No debates yet.</p>"
+            : debates.map(debate => `
                         <article>
                             <h3>
                                 <a href="/debate/${debate.id}" data-link>
@@ -30,7 +29,7 @@ export function renderHome() {
                             </p>
                         </article>
                     `).join("")
-            }
+        }
         </section>
     `;
 }
@@ -146,9 +145,18 @@ export function renderCreateDebate() {
 }
 
 export function renderDebate(debateId) {
-
     const debate = state.appData.debates.find(
-        debate => debate.id === debateId
+        (debate) => debate.id === debateId
+    );
+    const debateArguments = state.appData.arguments.filter(
+        argument => argument.debateId === debateId
+    );
+    const supportArguments = debateArguments.filter(
+        argument => argument.side === "support"
+    );
+
+    const opposeArguments = debateArguments.filter(
+        argument => argument.side === "oppose"
     );
 
     if (!debate) {
@@ -173,25 +181,83 @@ export function renderDebate(debateId) {
 
             <div>
                 <strong>Tags:</strong>
-                ${debate.tags.map(tag => `<span>${tag}</span>`).join(" ")}
+                ${debate.tags.map((tag) => `<span>${tag}</span>`).join(" ")}
             </div>
+
             <div>
                 <button data-position="support">Support</button>
                 <button data-position="oppose">Oppose</button>
                 <button data-position="undecided">Undecided</button>
             </div>
+
+            <section>
+                <h2>Add an Argument</h2>
+
+                <form id="argument-form">
+                    <textarea
+                        id="argument-content"
+                        placeholder="Write your argument..."
+                    ></textarea>
+
+                    <select id="argument-side">
+                        <option value="support">Support</option>
+                        <option value="oppose">Oppose</option>
+                    </select>
+
+                    <button type="submit">Submit Argument</button>
+
+                    <p id="argument-message"></p>
+                </form>
+            </section>
+
+            <section>
+                <h2>Supporting Arguments</h2>
+
+                ${
+                    supportArguments.length === 0
+                        ? "<p>No supporting arguments yet.</p>"
+                        : supportArguments.map(argument => `
+                            <article>
+                                <p>${argument.content}</p>
+                                       </article>
+                        `).join("")
+                }
+            </section>
+                        
+            <section>
+                <h2>Opposing Arguments</h2>
+
+                ${
+                    opposeArguments.length === 0
+                        ? "<p>No opposing arguments yet.</p>"
+                        : opposeArguments.map(argument => `
+                            <article>
+                                <p>${argument.content}</p>
+                            </article>
+                        `).join("")
+                }
+            </section>
+
+
             <div>
                 <h3>Current Positions</h3>
 
-                <p>Support: ${stats.supportPercentage}% (${stats.support})</p>
+                <p>
+                    Support: ${stats.supportPercentage}% (${stats.support})
+                </p>
 
-                <p>Oppose: ${stats.opposePercentage}% (${stats.oppose})</p>
+                <p>
+                    Oppose: ${stats.opposePercentage}% (${stats.oppose})
+                </p>
 
-                <p>Undecided: ${stats.undecidedPercentage}% (${stats.undecided})</p>
+                <p>
+                    Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
+                </p>
             </div>
         </article>
     `;
 }
+
 
 export function renderNotFound() {
     return `

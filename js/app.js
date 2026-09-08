@@ -6,6 +6,7 @@ import { renderNavbar } from "./ui.js";
 import { logoutUser } from "./auth.js";
 import { createDebate } from "./debates.js";
 import { setPosition } from "./positions.js";
+import { createArgument } from "./arguments.js";
 
 const app = document.querySelector("#app");
 
@@ -152,6 +153,43 @@ document.addEventListener("submit", (event) => {
 
         render();
     }
+
+    //Argument form
+    if (event.target.id === "argument-form") {
+
+    event.preventDefault();
+
+    const form = event.target;
+
+    const content = form
+        .querySelector("#argument-content")
+        .value
+        .trim();
+
+    const side = form
+        .querySelector("#argument-side")
+        .value;
+
+    const parts = window.location.pathname.split("/");
+    const debateId = parts[2];
+
+    const result = createArgument({
+        debateId,
+        side,
+        content
+    });
+
+    const message = document.querySelector("#argument-message");
+
+    if (!result.success) {
+        message.textContent = result.message;
+        return;
+    }
+
+    message.textContent = "Argument submitted!";
+
+    render();
+}
 });
 
 
