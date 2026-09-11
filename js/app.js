@@ -7,8 +7,8 @@ import { logoutUser } from "./auth.js";
 import { createDebate } from "./debates.js";
 import { setPosition } from "./positions.js";
 import { createArgument } from "./arguments.js";
-import { voteOnArgument } from "./votes.js";
-
+import { voteOnArgument, voteOnResponse } from "./votes.js";
+import { createResponse } from "./responses.js";
 
 const app = document.querySelector("#app");
 
@@ -60,21 +60,29 @@ document.addEventListener("click", (event) => {
     }
 
     //voting in arguments
-    const voteButton = event.target.closest("[data-vote]");
+    if (event.target.dataset.vote) {
 
-    if (voteButton) {
+    const value = event.target.dataset.vote;
 
-        const value = voteButton.dataset.vote;
-        const argumentId = voteButton.dataset.argumentId;
+    const argumentId = event.target.dataset.argumentId;
+    const responseId = event.target.dataset.responseId;
+
+    if (argumentId) {
 
         const result = voteOnArgument(argumentId, value);
 
-        if (!result.success) {
-            console.log(result.message);
-            return;
+        if (result.success) {
+            render();
         }
 
-        render();
+    } else if (responseId) {
+
+        const result = voteOnResponse(responseId, value);
+
+        if (result.success) {
+            render();
+        }
+    }
     }
 });
 
@@ -211,6 +219,32 @@ document.addEventListener("submit", (event) => {
 
         render();
     }
+
+    //response
+    if (event.target.classList.contains("response-form")) {
+    event.preventDefault();
+
+    const form = event.target;
+
+    const content = form.querySelector("textarea").value.trim();
+
+    const argumentId = form.dataset.argumentId;
+
+    const result = createResponse({
+        argumentId,
+        content
+    });
+
+    if (!result.success) {
+        form.querySelector(".response-message").textContent =
+            result.message;
+
+        return;
+    }
+
+    render();
+    }
+
 });
 
 

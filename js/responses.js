@@ -1,9 +1,6 @@
 import { state } from "./state.js";
 import { saveState } from "./storage.js";
 
-import { state } from "./state.js";
-import { saveState } from "./storage.js";
-
 export function createResponse({ argumentId, content }) {
 
     // A response can only be created by a logged-in user

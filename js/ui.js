@@ -1,6 +1,7 @@
 import { state } from "./state.js";
 import { getPositionStats } from "./positions.js";
 import { getArgumentVoteStats } from "./votes.js";
+import { getResponseVoteStats } from "./votes.js";
 
 export function renderHome() {
 
@@ -146,156 +147,260 @@ export function renderCreateDebate() {
 }
 
 export function renderDebate(debateId) {
-    const debate = state.appData.debates.find(
-        (debate) => debate.id === debateId
-    );
-    const debateArguments = state.appData.arguments.filter(
-        argument => argument.debateId === debateId
-    );
-    const supportArguments = debateArguments.filter(
-        argument => argument.side === "support"
-    );
+  const debate = state.appData.debates.find(
+    (debate) => debate.id === debateId
+  );
 
-    const opposeArguments = debateArguments.filter(
-        argument => argument.side === "oppose"
-    );
+  const debateArguments = state.appData.arguments.filter(
+    (argument) => argument.debateId === debateId
+  );
 
-    if (!debate) {
-        return `
-            <h1>Debate Not Found</h1>
-            <p>The debate you're looking for does not exist.</p>
-        `;
-    }
+  const supportArguments = debateArguments.filter(
+    (argument) => argument.side === "support"
+  );
 
-    const stats = getPositionStats(debateId);
+  const opposeArguments = debateArguments.filter(
+    (argument) => argument.side === "oppose"
+  );
 
+  if (!debate) {
     return `
-        <article>
-            <h1>${debate.title}</h1>
+      <h1>Debate Not Found</h1>
+      <p>The debate you're looking for does not exist.</p>
+    `;
+  }
 
-            <p>${debate.description}</p>
+  const stats = getPositionStats(debateId);
 
-            <p>
-                <strong>Topic:</strong>
-                ${debate.topic}
-            </p>
+  return `
+    <article>
+      <h1>${debate.title}</h1>
+      <p>${debate.description}</p>
 
-            <div>
-                <strong>Tags:</strong>
-                ${debate.tags.map((tag) => `<span>${tag}</span>`).join(" ")}
-            </div>
+      <p>
+        <strong>Topic:</strong> ${debate.topic}
+      </p>
 
-            <div>
-                <button data-position="support">Support</button>
-                <button data-position="oppose">Oppose</button>
-                <button data-position="undecided">Undecided</button>
-            </div>
+      <div>
+        <strong>Tags:</strong>
+        ${debate.tags.map((tag) => `<span>${tag}</span>`).join(" ")}
+      </div>
 
-            <section>
-                <h2>Add an Argument</h2>
+      <div>
+        <button data-position="support">Support</button>
+        <button data-position="oppose">Oppose</button>
+        <button data-position="undecided">Undecided</button>
+      </div>
 
-                <form id="argument-form">
-                    <textarea
-                        id="argument-content"
-                        placeholder="Write your argument..."
-                    ></textarea>
+      <section>
+        <h2>Add an Argument</h2>
 
-                    <select id="argument-side">
-                        <option value="support">Support</option>
-                        <option value="oppose">Oppose</option>
-                    </select>
+        <form id="argument-form">
+          <textarea
+            id="argument-content"
+            placeholder="Write your argument..."
+          ></textarea>
 
-                    <button type="submit">Submit Argument</button>
+          <select id="argument-side">
+            <option value="support">Support</option>
+            <option value="oppose">Oppose</option>
+          </select>
 
-                    <p id="argument-message"></p>
-                </form>
-            </section>
+          <button type="submit">Submit Argument</button>
 
-            <section>
-                <h2>Supporting Arguments</h2>
+          <p id="argument-message"></p>
+        </form>
+      </section>
 
-                ${supportArguments.length === 0
+      <section>
+        <h2>Supporting Arguments</h2>
+
+        ${
+          supportArguments.length === 0
             ? "<p>No supporting arguments yet.</p>"
-            : supportArguments.map(argument => {
+            : supportArguments
+                .map((argument) => {
+                  const votes = getArgumentVoteStats(argument.id);
 
-    const votes = getArgumentVoteStats(argument.id);
+                  const responses = state.appData.responses.filter(
+                    (response) => response.argumentId === argument.id
+                  );
 
-    return `
-        <article>
-            <p>${argument.content}</p>
+                  return `
+                    <article>
+                      <p>${argument.content}</p>
 
-            <button
-                data-vote="up"
-                data-argument-id="${argument.id}"
-            >
-                ↑ ${votes.upvotes}
-            </button>
+                      <button
+                        data-vote="up"
+                        data-argument-id="${argument.id}"
+                      >
+                        ↑ ${votes.upvotes}
+                      </button>
 
-            <button
-                data-vote="down"
-                data-argument-id="${argument.id}"
-            >
-                ↓ ${votes.downvotes}
-            </button>
-        </article>
-    `;
+                      <button
+                        data-vote="down"
+                        data-argument-id="${argument.id}"
+                      >
+                        ↓ ${votes.downvotes}
+                      </button>
 
-}).join("")
+                      <section>
+                        <h4>Responses</h4>
+
+                        ${
+                          responses.length === 0
+                            ? "<p>No responses yet.</p>"
+                            : responses
+                                .map((response) => {
+                                  const stats = getResponseVoteStats(
+                                    response.id
+                                  );
+
+                                  return `
+                                    <div>
+                                      <p>${response.content}</p>
+
+                                      <button
+                                        data-vote="up"
+                                        data-response-id="${response.id}"
+                                      >
+                                        👍 ${stats.upvotes}
+                                      </button>
+
+                                      <button
+                                        data-vote="down"
+                                        data-response-id="${response.id}"
+                                      >
+                                        👎 ${stats.downvotes}
+                                      </button>
+                                    </div>
+                                  `;
+                                })
+                                .join("")
+                        }
+
+                        <form
+                          class="response-form"
+                          data-argument-id="${argument.id}"
+                        >
+                          <textarea
+                            placeholder="Ask for clarification or respond..."
+                          ></textarea>
+
+                          <button type="submit">Reply</button>
+                        </form>
+                      </section>
+                    </article>
+                  `;
+                })
+                .join("")
         }
-            </section>
-                        
-            <section>
-                <h2>Opposing Arguments</h2>
+      </section>
 
-                ${opposeArguments.length === 0
-            ? "<p>No opposing arguments yet.</p>"
-            : opposeArguments.map(argument => {
+      <section>
+        <h2>Opposing Arguments</h2>
 
-    const votes = getArgumentVoteStats(argument.id);
+        ${
+          opposeArguments.length === 0
+            ? "<p>No opposing arguments yet."
+            : opposeArguments
+                .map((argument) => {
+                  const votes = getArgumentVoteStats(argument.id);
 
-    return `
-        <article>
-            <p>${argument.content}</p>
+                  const responses = state.appData.responses.filter(
+                    (response) => response.argumentId === argument.id
+                  );
 
-            <button
-                data-vote="up"
-                data-argument-id="${argument.id}"
-            >
-                ↑ ${votes.upvotes}
-            </button>
+                  return `
+                    <article>
+                      <p>${argument.content}</p>
 
-            <button
-                data-vote="down"
-                data-argument-id="${argument.id}"
-            >
-                ↓ ${votes.downvotes}
-            </button>
-        </article>
-    `;
+                      <button
+                        data-vote="up"
+                        data-argument-id="${argument.id}"
+                      >
+                        ↑ ${votes.upvotes}
+                      </button>
 
-}).join("")
+                      <button
+                        data-vote="down"
+                        data-argument-id="${argument.id}"
+                      >
+                        ↓ ${votes.downvotes}
+                      </button>
+
+                      <section>
+                        <h4>Responses</h4>
+
+                        ${
+                          responses.length === 0
+                            ? "<p>No responses yet.</p>"
+                            : responses
+                                .map((response) => {
+                                  const stats = getResponseVoteStats(
+                                    response.id
+                                  );
+
+                                  return `
+                                    <div>
+                                      <p>${response.content}</p>
+
+                                      <button
+                                        data-vote="up"
+                                        data-response-id="${response.id}"
+                                      >
+                                        👍 ${stats.upvotes}
+                                      </button>
+
+                                      <button
+                                        data-vote="down"
+                                        data-response-id="${response.id}"
+                                      >
+                                        👎 ${stats.downvotes}
+                                      </button>
+                                    </div>
+                                  `;
+                                })
+                                .join("")
+                        }
+
+                        <form
+                          class="response-form"
+                          data-argument-id="${argument.id}"
+                        >
+                          <textarea
+                            placeholder="Ask for clarification or respond..."
+                          ></textarea>
+
+                          <button type="submit">Reply</button>
+                        </form>
+                      </section>
+                    </article>
+                  `;
+                })
+                .join("")
         }
-            </section>
+      </section>
 
+      <div>
+        <h3>Current Positions</h3>
 
-            <div>
-                <h3>Current Positions</h3>
+        <p>
+          Support: ${stats.supportPercentage}% (${stats.support})
+        </p>
 
-                <p>
-                    Support: ${stats.supportPercentage}% (${stats.support})
-                </p>
+        <p>
+          Oppose: ${stats.opposePercentage}% (${stats.oppose})
+        </p>
 
-                <p>
-                    Oppose: ${stats.opposePercentage}% (${stats.oppose})
-                </p>
-
-                <p>
-                    Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
-                </p>
-            </div>
-        </article>
-    `;
+        <p>
+          Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
+        </p>
+      </div>
+    </article>
+  `;
 }
+
 
 
 export function renderNotFound() {
@@ -332,3 +437,32 @@ export function renderNavbar() { //MAKING NAVBAR DYNAMIC DIFFERENT FOR LOGIN AND
 // "How should that view look?"
 //     ↓
 // DOM
+//User clicks Reply
+//        ↓
+// submit event
+//        ↓
+// event.target = response form
+//        ↓
+// form.dataset.argumentId
+//        ↓
+// createResponse()
+//        ↓
+// state.appData.responses.push(...)
+//        ↓
+// saveState()
+//        ↓
+// render()
+//        ↓
+// response appears
+
+// createArgument()
+//       ↓
+// argument object created
+//       ↓
+// state.appData.arguments.push(argument)
+//       ↓
+// later ui.js reads state.appData.arguments
+//       ↓
+// .map(argument => ...)
+//       ↓
+// argument.id
