@@ -3,6 +3,16 @@ import { getPositionStats } from "./positions.js";
 import { getArgumentVoteStats } from "./votes.js";
 import { getResponseVoteStats } from "./votes.js";
 
+
+function escapeHTML(value) {
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+ 
 export function renderHome() {
 
     const debates = state.appData.debates;
@@ -20,14 +30,14 @@ export function renderHome() {
                         <article>
                             <h3>
                                 <a href="/debate/${debate.id}" data-link>
-                                    ${debate.title}
+                                    ${escapeHTML(debate.title)}
                                 </a>
                             </h3>
 
-                            <p>${debate.description}</p>
+                            <p>${escapeHTML(debate.description)}</p>
 
                             <p>
-                                Topic: ${debate.topic}
+                                Topic: ${escapeHTML(debate.topic)}
                             </p>
                         </article>
                     `).join("")
@@ -228,7 +238,7 @@ export function renderDebate(debateId) {
 
                   return `
                     <article>
-                      <p>${argument.content}</p>
+                      <p>${escapeHTML(argument.content)}</p>
 
                       <button
                         data-vote="up"
@@ -258,7 +268,7 @@ export function renderDebate(debateId) {
 
                                   return `
                                     <div>
-                                      <p>${response.content}</p>
+                                      <p>${escapeHTML(response.content)}</p>
 
                                       <button
                                         data-vote="up"
@@ -313,7 +323,7 @@ export function renderDebate(debateId) {
 
                   return `
                     <article>
-                      <p>${argument.content}</p>
+                      <p>${escapeHTML(argument.content)}</p>
 
                       <button
                         data-vote="up"
@@ -343,7 +353,7 @@ export function renderDebate(debateId) {
 
                                   return `
                                     <div>
-                                      <p>${response.content}</p>
+                                      <p>${escapeHTML(response.content)}</p>
 
                                       <button
                                         data-vote="up"
