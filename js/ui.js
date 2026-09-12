@@ -3,14 +3,6 @@ import { getPositionStats } from "./positions.js";
 import { getArgumentVoteStats } from "./votes.js";
 import { getResponseVoteStats } from "./votes.js";
 
-function getAuthorName(authorId) {
-  const user = state.appData.users.find(
-    user => user.id === authorId
-  );
-
-  return user ? user.username : "Unknown User";
-}
-
 function escapeHTML(value) {
   return value
     .replaceAll("&", "&amp;")
@@ -19,6 +11,41 @@ function escapeHTML(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+function formatTime(createdAt) {
+    const diff = Date.now() - new Date(createdAt).getTime();
+
+    const seconds = Math.floor(diff / 1000);
+
+    if (seconds < 60) {
+        return "Just now";
+    }
+
+    const minutes = Math.floor(seconds / 60);
+
+    if (minutes < 60) {
+        return `${minutes}m ago`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+
+    if (hours < 24) {
+        return `${hours}h ago`;
+    }
+
+    const days = Math.floor(hours / 24);
+
+    return `${days}d ago`;
+}
+
+function getAuthorName(authorId) {
+    const user = state.appData.users.find(
+        user => user.id === authorId
+    );
+
+    return user?.username || "Unknown User";
+}
+
 
 export function renderHome() {
 
@@ -105,7 +132,7 @@ export function renderRegister() {
               Username
               <input type="text" id="username">
             </label>
-            
+
             <label>
                 Email
                 <input type="email" id="email">
@@ -195,16 +222,18 @@ export function renderDebate(debateId) {
 
   return `
     <article>
-      <h1>${debate.title}</h1>
-      <p>${debate.description}</p>
+      <h1>${escapeHTML(debate.title)}</h1>
+      <p>By ${escapeHTML(getAuthorName(debate.authorId))} · ${formatTime(debate.createdAt)}</p>
+      
+      <p>${escapeHTML(debate.description)}</p>
 
       <p>
-        <strong>Topic:</strong> ${debate.topic}
+        <strong>Topic:</strong> ${escapeHTML(debate.topic)}
       </p>
 
       <div>
         <strong>Tags:</strong>
-        ${debate.tags.map((tag) => `<span>${tag}</span>`).join(" ")}
+        ${debate.tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join(" ")}
       </div>
 
       <div>
@@ -248,7 +277,12 @@ export function renderDebate(debateId) {
 
           return `
                     <article>
-                      <p>${escapeHTML(argument.content)}</p>
+                      <p>${escapeHTML(argument.content)}
+                        <p>
+                           By ${escapeHTML(getAuthorName(argument.authorId))}
+                          · ${formatTime(argument.createdAt)}
+                        </p>
+                      </p>
 
                       <button
                         data-vote="up"
@@ -278,6 +312,10 @@ export function renderDebate(debateId) {
                   return `
                                     <div>
                                       <p>${escapeHTML(response.content)}</p>
+                                      <p>
+                                          By ${escapeHTML(getAuthorName(response.authorId))}
+                                          · ${formatTime(response.createdAt)}
+                                      </p>
 
                                       <button
                                         data-vote="up"
@@ -332,7 +370,10 @@ export function renderDebate(debateId) {
           return `
                     <article>
                       <p>${escapeHTML(argument.content)}</p>
-
+                        <p>
+                           By ${escapeHTML(getAuthorName(argument.authorId))}
+                          · ${formatTime(argument.createdAt)}
+                        </p>
                       <button
                         data-vote="up"
                         data-argument-id="${argument.id}"
@@ -361,7 +402,10 @@ export function renderDebate(debateId) {
                   return `
                                     <div>
                                       <p>${escapeHTML(response.content)}</p>
-
+                                      <p>
+                                          By ${escapeHTML(getAuthorName(response.authorId))}
+                                          · ${formatTime(response.createdAt)}
+                                      </p>
                                       <button
                                         data-vote="up"
                                         data-response-id="${response.id}"
