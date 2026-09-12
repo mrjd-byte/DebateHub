@@ -1,8 +1,14 @@
 import { state } from "./state.js";
 import { saveState } from "./storage.js";
 
-export function registerUser({ email, phone, password }) {
+export function registerUser({ username, email, phone, password }) {
 
+    if (!username) {
+    return {
+        success: false,
+        message: "Username is required."
+        };
+    }
     if (!email && !phone) {
         return {
             success: false,
@@ -31,6 +37,7 @@ export function registerUser({ email, phone, password }) {
 
     const user = {
         id: crypto.randomUUID(),
+        username,
         email: email || null,
         phone: phone || null,
         password

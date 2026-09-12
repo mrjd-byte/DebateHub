@@ -93,11 +93,13 @@ document.addEventListener("submit", (event) => {
 
         const form = event.target;
 
+        const username = document.querySelector("#username").value.trim();
         const email = form.querySelector("#email").value.trim();
         const phone = form.querySelector("#phone").value.trim();
         const password = form.querySelector("#password").value;
 
         const result = registerUser({
+            username,
             email,
             phone,
             password
