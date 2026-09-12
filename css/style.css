@@ -8,7 +8,10 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
     color: #222;
+    line-height: 1.6;
 }
+
+/* ---------- NAVBAR ---------- */
 
 header {
     background-color: #ffffff;
@@ -18,20 +21,278 @@ header {
 
 nav {
     display: flex;
+    align-items: center;
     gap: 20px;
 }
 
 nav a {
     text-decoration: none;
     color: #333;
+    font-weight: 500;
 }
 
 nav a:hover {
+    color: #000;
     text-decoration: underline;
 }
+
+/* ---------- MAIN CONTENT ---------- */
 
 #app {
     max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
+}
+
+/* ---------- HEADINGS ---------- */
+
+h1 {
+    margin-bottom: 8px;
+}
+
+h2 {
+    margin-bottom: 16px;
+}
+
+h3 {
+    margin-bottom: 6px;
+}
+
+h4 {
+    margin-bottom: 10px;
+}
+
+/* ---------- SECTIONS ---------- */
+
+section {
+    margin-top: 30px;
+}
+
+/* ---------- DEBATE / ARGUMENT CARDS ---------- */
+
+article {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 16px;
+}
+
+/* ---------- LINKS ---------- */
+
+article a {
+    color: #222;
+}
+
+article a:hover {
+    color: #555;
+}
+
+/* ---------- FORMS ---------- */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font: inherit;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* ---------- BUTTONS ---------- */
+
+button {
+    width: fit-content;
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    cursor: pointer;
+    font: inherit;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background-color: #f0f0f0;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+/* ---------- ARGUMENT CARDS ---------- */
+
+.argument-card {
+    border-left: 5px solid;
+}
+
+/* Arguments supporting the debate */
+.support-argument {
+    border-left-color: #2e8b57;
+}
+
+/* Arguments opposing the debate */
+.oppose-argument {
+    border-left-color: #d9534f;
+}
+/* ---------- RESPONSES ---------- */
+
+.response {
+    margin: 16px 0 0 20px;
+    padding: 12px 16px;
+    border-left: 3px solid #ddd;
+    background-color: #fafafa;
+    border-radius: 4px;
+}
+.position-button:hover {
+    color: #fff;
+}
+
+.support-button:hover {
+    background-color: #2e8b57;
+}
+
+.oppose-button:hover {
+    background-color: #d9534f;
+}
+
+.undecided-button:hover {
+    background-color: #777;
+}
+button[data-vote="up"]:hover {
+    background-color: #e8f5e9;
+}
+
+button[data-vote="down"]:hover {
+    background-color: #ffebee;
+}
+.response-form button {
+    align-self: flex-start;
+}
+.response-form {
+    margin-top: 16px;
+}
+
+.response-form textarea {
+    min-height: 70px;
+}
+
+/* ---------- ARGUMENT LAYOUT ---------- */
+
+.argument-card {
+    padding: 20px;
+    border-left: 5px solid;
+}
+
+.argument-author,
+.response-author {
+    font-size: 14px;
+    color: #555;
+}
+
+.argument-content {
+    margin-top: 8px;
+    font-size: 17px;
+}
+
+/* ---------- ACTIONS ---------- */
+
+.argument-actions,
+.response-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.argument-actions button,
+.response-actions button {
+    border: none;
+    background: transparent;
+    padding: 6px 8px;
+    color: #555;
+}
+
+.argument-actions button:hover,
+.response-actions button:hover {
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+/* ---------- RESPONSES ---------- */
+
+.responses {
+    margin-top: 24px;
+    padding-left: 20px;
+    border-left: 2px solid #eee;
+}
+
+.responses h4 {
+    margin-bottom: 12px;
+}
+
+.response {
+    margin-top: 18px;
+}
+
+.response-content {
+    margin-top: 4px;
+}
+
+.no-responses {
+    color: #777;
+    font-size: 14px;
+}
+
+/* ---------- RESPONSE FORM ---------- */
+
+.response-form {
+    margin-top: 20px;
+}
+
+.response-form textarea {
+    min-height: 60px;
+}
+/* ---------- EMPTY STATES ---------- */
+
+.empty-state {
+    padding: 24px;
+    text-align: center;
+    color: #666;
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+.empty-state p {
+    font-weight: 600;
+    color: #444;
+}
+
+.empty-state span {
+    font-size: 14px;
+}
+
+.no-responses {
+    color: #777;
+    font-size: 14px;
+    margin-top: 8px;
 }

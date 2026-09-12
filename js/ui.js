@@ -13,37 +13,37 @@ function escapeHTML(value) {
 }
 
 function formatTime(createdAt) {
-    const diff = Date.now() - new Date(createdAt).getTime();
+  const diff = Date.now() - new Date(createdAt).getTime();
 
-    const seconds = Math.floor(diff / 1000);
+  const seconds = Math.floor(diff / 1000);
 
-    if (seconds < 60) {
-        return "Just now";
-    }
+  if (seconds < 60) {
+    return "Just now";
+  }
 
-    const minutes = Math.floor(seconds / 60);
+  const minutes = Math.floor(seconds / 60);
 
-    if (minutes < 60) {
-        return `${minutes}m ago`;
-    }
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
 
-    const hours = Math.floor(minutes / 60);
+  const hours = Math.floor(minutes / 60);
 
-    if (hours < 24) {
-        return `${hours}h ago`;
-    }
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
 
-    const days = Math.floor(hours / 24);
+  const days = Math.floor(hours / 24);
 
-    return `${days}d ago`;
+  return `${days}d ago`;
 }
 
 function getAuthorName(authorId) {
-    const user = state.appData.users.find(
-        user => user.id === authorId
-    );
+  const user = state.appData.users.find(
+    user => user.id === authorId
+  );
 
-    return user?.username || "Unknown User";
+  return user?.username || "Unknown User";
 }
 
 
@@ -237,9 +237,32 @@ export function renderDebate(debateId) {
       </div>
 
       <div>
-        <button data-position="support">Support</button>
-        <button data-position="oppose">Oppose</button>
-        <button data-position="undecided">Undecided</button>
+        <button class="position-button support-button" data-position="support">
+            Support
+        </button>
+
+        <button class="position-button oppose-button" data-position="oppose">
+            Oppose
+        </button>
+
+        <button class="position-button undecided-button" data-position="undecided">
+            Undecided
+        </button>
+      </div>
+      <div>
+        <h3>Current Positions</h3>
+
+        <p>
+          Support: ${stats.supportPercentage}% (${stats.support})
+        </p>
+
+        <p>
+          Oppose: ${stats.opposePercentage}% (${stats.oppose})
+        </p>
+
+        <p>
+          Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
+        </p>
       </div>
 
       <section>
@@ -266,7 +289,12 @@ export function renderDebate(debateId) {
         <h2>Supporting Arguments</h2>
 
         ${supportArguments.length === 0
-      ? "<p>No supporting arguments yet.</p>"
+      ? `
+        <div class="empty-state">
+            <p>No supporting arguments yet.</p>
+            <span>Be the first to take a stand!</span>
+        </div>
+      `
       : supportArguments
         .map((argument) => {
           const votes = getArgumentVoteStats(argument.id);
@@ -276,79 +304,115 @@ export function renderDebate(debateId) {
           );
 
           return `
-                    <article>
-                      <p>${escapeHTML(argument.content)}
-                        <p>
-                           By ${escapeHTML(getAuthorName(argument.authorId))}
-                          · ${formatTime(argument.createdAt)}
-                        </p>
-                      </p>
+    <article class="argument-card support-argument">
 
-                      <button
-                        data-vote="up"
-                        data-argument-id="${argument.id}"
-                      >
-                        ↑ ${votes.upvotes}
-                      </button>
+        <div class="argument-author">
+            <strong>${escapeHTML(getAuthorName(argument.authorId))}</strong>
+            <span>· ${formatTime(argument.createdAt)}</span>
+        </div>
 
-                      <button
-                        data-vote="down"
-                        data-argument-id="${argument.id}"
-                      >
-                        ↓ ${votes.downvotes}
-                      </button>
+        <p class="argument-content">
+            ${escapeHTML(argument.content)}
+        </p>
 
-                      <section>
-                        <h4>Responses</h4>
+        <div class="argument-actions">
 
-                        ${responses.length === 0
-              ? "<p>No responses yet.</p>"
-              : responses
-                .map((response) => {
-                  const stats = getResponseVoteStats(
-                    response.id
-                  );
+            <button
+                data-vote="up"
+                data-argument-id="${argument.id}"
+            >
+                ↑ ${votes.upvotes}
+            </button>
 
-                  return `
-                                    <div>
-                                      <p>${escapeHTML(response.content)}</p>
-                                      <p>
-                                          By ${escapeHTML(getAuthorName(response.authorId))}
-                                          · ${formatTime(response.createdAt)}
-                                      </p>
+            <button
+                data-vote="down"
+                data-argument-id="${argument.id}"
+            >
+                ↓ ${votes.downvotes}
+            </button>
 
-                                      <button
+            <button type="button">
+                💬 ${responses.length}
+            </button>
+
+            <button type="button">
+                Reply
+            </button>
+
+        </div>
+
+        <section class="responses">
+
+            <h4>Responses</h4>
+
+            ${responses.length === 0
+              ? `<p class="no-responses">No responses yet.</p>`
+              : responses.map(response => {
+
+                const stats = getResponseVoteStats(response.id);
+
+                return `
+                            <div class="response">
+
+                                <div class="response-author">
+                                    <strong>
+                                        ${escapeHTML(
+                  getAuthorName(response.authorId)
+                )}
+                                    </strong>
+
+                                    <span>
+                                        · ${formatTime(response.createdAt)}
+                                    </span>
+                                </div>
+
+                                <p class="response-content">
+                                    ${escapeHTML(response.content)}
+                                </p>
+
+                                <div class="response-actions">
+
+                                    <button
                                         data-vote="up"
                                         data-response-id="${response.id}"
-                                      >
+                                    >
                                         👍 ${stats.upvotes}
-                                      </button>
+                                    </button>
 
-                                      <button
+                                    <button
                                         data-vote="down"
                                         data-response-id="${response.id}"
-                                      >
+                                    >
                                         👎 ${stats.downvotes}
-                                      </button>
-                                    </div>
-                                  `;
-                })
-                .join("")
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        `;
+              }).join("")
             }
 
-                        <form
-                          class="response-form"
-                          data-argument-id="${argument.id}"
-                        >
-                          <textarea
-                            placeholder="Ask for clarification or respond..."
-                          ></textarea>
+            <form
+                class="response-form"
+                data-argument-id="${argument.id}"
+            >
 
-                          <button type="submit">Reply</button>
-                        </form>
-                      </section>
-                    </article>
-                  `;
+                <textarea
+                    placeholder="Respond to this argument..."
+                ></textarea>
+
+                <button type="submit">
+                    Reply
+                </button>
+
+            </form>
+
+        </section>
+
+    </article>
+`;
+
         })
         .join("")
     }
@@ -358,7 +422,12 @@ export function renderDebate(debateId) {
         <h2>Opposing Arguments</h2>
 
         ${opposeArguments.length === 0
-      ? "<p>No opposing arguments yet."
+      ? `
+        <div class="empty-state">
+            <p>No opposing arguments yet.</p>
+            <span>Be the first to challenge this position!</span>
+        </div>
+      `
       : opposeArguments
         .map((argument) => {
           const votes = getArgumentVoteStats(argument.id);
@@ -367,97 +436,124 @@ export function renderDebate(debateId) {
             (response) => response.argumentId === argument.id
           );
 
-          return `
-                    <article>
-                      <p>${escapeHTML(argument.content)}</p>
-                        <p>
-                           By ${escapeHTML(getAuthorName(argument.authorId))}
-                          · ${formatTime(argument.createdAt)}
-                        </p>
-                      <button
-                        data-vote="up"
-                        data-argument-id="${argument.id}"
-                      >
-                        ↑ ${votes.upvotes}
-                      </button>
+return `
+    <article class="argument-card support-argument">
 
-                      <button
-                        data-vote="down"
-                        data-argument-id="${argument.id}"
-                      >
-                        ↓ ${votes.downvotes}
-                      </button>
+        <div class="argument-author">
+            <strong>${escapeHTML(getAuthorName(argument.authorId))}</strong>
+            <span>· ${formatTime(argument.createdAt)}</span>
+        </div>
 
-                      <section>
-                        <h4>Responses</h4>
+        <p class="argument-content">
+            ${escapeHTML(argument.content)}
+        </p>
 
-                        ${responses.length === 0
-              ? "<p>No responses yet.</p>"
-              : responses
-                .map((response) => {
-                  const stats = getResponseVoteStats(
-                    response.id
-                  );
+        <div class="argument-actions">
 
-                  return `
-                                    <div>
-                                      <p>${escapeHTML(response.content)}</p>
-                                      <p>
-                                          By ${escapeHTML(getAuthorName(response.authorId))}
-                                          · ${formatTime(response.createdAt)}
-                                      </p>
-                                      <button
+            <button
+                data-vote="up"
+                data-argument-id="${argument.id}"
+            >
+                ↑ ${votes.upvotes}
+            </button>
+
+            <button
+                data-vote="down"
+                data-argument-id="${argument.id}"
+            >
+                ↓ ${votes.downvotes}
+            </button>
+
+            <button type="button">
+                💬 ${responses.length}
+            </button>
+
+            <button type="button">
+                Reply
+            </button>
+
+        </div>
+
+        <section class="responses">
+
+            <h4>Responses</h4>
+
+            ${
+                responses.length === 0
+                    ?`<p class="no-responses">
+                          No responses yet. Start the conversation.
+                      </p>`
+                    : responses.map(response => {
+
+                        const stats = getResponseVoteStats(response.id);
+
+                        return `
+                            <div class="response">
+
+                                <div class="response-author">
+                                    <strong>
+                                        ${escapeHTML(
+                                            getAuthorName(response.authorId)
+                                        )}
+                                    </strong>
+
+                                    <span>
+                                        · ${formatTime(response.createdAt)}
+                                    </span>
+                                </div>
+
+                                <p class="response-content">
+                                    ${escapeHTML(response.content)}
+                                </p>
+
+                                <div class="response-actions">
+
+                                    <button
                                         data-vote="up"
                                         data-response-id="${response.id}"
-                                      >
+                                    >
                                         👍 ${stats.upvotes}
-                                      </button>
+                                    </button>
 
-                                      <button
+                                    <button
                                         data-vote="down"
                                         data-response-id="${response.id}"
-                                      >
+                                    >
                                         👎 ${stats.downvotes}
-                                      </button>
-                                    </div>
-                                  `;
-                })
-                .join("")
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        `;
+                    }).join("")
             }
 
-                        <form
-                          class="response-form"
-                          data-argument-id="${argument.id}"
-                        >
-                          <textarea
-                            placeholder="Ask for clarification or respond..."
-                          ></textarea>
+            <form
+                class="response-form"
+                data-argument-id="${argument.id}"
+            >
 
-                          <button type="submit">Reply</button>
-                        </form>
-                      </section>
-                    </article>
-                  `;
+                <textarea
+                    placeholder="Respond to this argument..."
+                ></textarea>
+
+                <button type="submit">
+                    Reply
+                </button>
+
+            </form>
+
+        </section>
+
+    </article>
+`;
         })
         .join("")
     }
       </section>
 
-      <div>
-        <h3>Current Positions</h3>
-
-        <p>
-          Support: ${stats.supportPercentage}% (${stats.support})
-        </p>
-
-        <p>
-          Oppose: ${stats.opposePercentage}% (${stats.oppose})
-        </p>
-
-        <p>
-          Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
-        </p>
-      </div>
+      
     </article>
   `;
 }
