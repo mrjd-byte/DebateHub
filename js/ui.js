@@ -110,9 +110,16 @@ export function renderLogin() {
 }
 
 export function renderProfile() {
+  const user = state.auth.currentUser;
   return `
         <h1>Profile</h1>
-        <p>Profile page coming soon.</p>
+        <p>Username: ${escapeHTML(user.username)}</p>
+        <p>
+            ${user.email
+                ? `Email: ${escapeHTML(user.email)}`
+                : `Phone: ${escapeHTML(user.phone)}`
+            }
+        </p>
     `;
 }
 
