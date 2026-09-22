@@ -36,3 +36,54 @@ export function createDebate({ title, description, topic, tags }) {
         debate
     };
 }
+
+//UPDATE DEBATE
+export function updateDebate(debateId, { title, description, topic, tags }) {
+
+    if (!state.auth.currentUser) {
+        return {
+            success: false,
+            message: "You must be logged in to update a debate."
+        };
+    }
+
+    const debate = state.appData.debates.find(
+        debate => debate.id === debateId
+    );
+
+    if (!debate) {
+        return {
+            success: false,
+            message: "Debate not found."
+        };
+    }
+
+    // Only the author can update their debate
+    if (debate.authorId !== state.auth.currentUser.id) {
+        return {
+            success: false,
+            message: "You can only update your own debate."
+        };
+    }
+
+    // Basic validation
+    if (!title || !description || !topic) {
+        return {
+            success: false,
+            message: "Title, description and topic are required."
+        };
+    }
+
+    // Update the existing object
+    debate.title = title;
+    debate.description = description;
+    debate.topic = topic;
+    debate.tags = tags;
+
+    saveState();
+
+    return {
+        success: true,
+        debate
+    };
+}

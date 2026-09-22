@@ -4,54 +4,54 @@ import { getArgumentVoteStats } from "./votes.js";
 import { getResponseVoteStats } from "./votes.js";
 
 function escapeHTML(value) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 function formatTime(createdAt) {
-  const diff = Date.now() - new Date(createdAt).getTime();
+    const diff = Date.now() - new Date(createdAt).getTime();
 
-  const seconds = Math.floor(diff / 1000);
+    const seconds = Math.floor(diff / 1000);
 
-  if (seconds < 60) {
-    return "Just now";
-  }
+    if (seconds < 60) {
+        return "Just now";
+    }
 
-  const minutes = Math.floor(seconds / 60);
+    const minutes = Math.floor(seconds / 60);
 
-  if (minutes < 60) {
-    return `${minutes}m ago`;
-  }
+    if (minutes < 60) {
+        return `${minutes}m ago`;
+    }
 
-  const hours = Math.floor(minutes / 60);
+    const hours = Math.floor(minutes / 60);
 
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
+    if (hours < 24) {
+        return `${hours}h ago`;
+    }
 
-  const days = Math.floor(hours / 24);
+    const days = Math.floor(hours / 24);
 
-  return `${days}d ago`;
+    return `${days}d ago`;
 }
 
 function getAuthorName(authorId) {
-  const user = state.appData.users.find(
-    user => user.id === authorId
-  );
+    const user = state.appData.users.find(
+        user => user.id === authorId
+    );
 
-  return user?.username || "Unknown User";
+    return user?.username || "Unknown User";
 }
 
 
 export function renderHome() {
 
-  const debates = state.appData.debates;
+    const debates = state.appData.debates;
 
-  return `
+    return `
         <h1>Debate Platform</h1>
         <p>Explore debates and different perspectives.</p>
 
@@ -59,8 +59,8 @@ export function renderHome() {
             <h2>Available Debates</h2>
 
             ${debates.length === 0
-      ? "<p>No debates yet.</p>"
-      : debates.map(debate => `
+            ? "<p>No debates yet.</p>"
+            : debates.map(debate => `
                         <article>
                             <h3>
                                 <a href="/debate/${debate.id}" data-link>
@@ -75,13 +75,13 @@ export function renderHome() {
                             </p>
                         </article>
                     `).join("")
-    }
+        }
         </section>
     `;
 }
 
 export function renderLogin() {
-  return `
+    return `
         <h1>Login</h1>
 
         <form id="login-form">
@@ -110,28 +110,28 @@ export function renderLogin() {
 }
 
 export function renderProfile() {
-  const user = state.auth.currentUser;
-  return `
+    const user = state.auth.currentUser;
+    return `
         <h1>Profile</h1>
         <p>Username: ${escapeHTML(user.username)}</p>
         <p>
             ${user.email
-                ? `Email: ${escapeHTML(user.email)}`
-                : `Phone: ${escapeHTML(user.phone)}`
-            }
+            ? `Email: ${escapeHTML(user.email)}`
+            : `Phone: ${escapeHTML(user.phone)}`
+        }
         </p>
     `;
 }
 
 export function renderSearch() {
-  return `
+    return `
         <h1>Search</h1>
         <p>Search page coming soon.</p>
     `;
 }
 
 export function renderRegister() {
-  return `
+    return `
         <h1>Create Account</h1>
 
         <form id="register-form">
@@ -164,7 +164,7 @@ export function renderRegister() {
 }
 
 export function renderCreateDebate() {
-  return `
+    return `
         <h1>Create Debate</h1>
 
         <form id="create-debate-form">
@@ -202,37 +202,51 @@ export function renderCreateDebate() {
 }
 
 export function renderDebate(debateId) {
-  const debate = state.appData.debates.find(
-    (debate) => debate.id === debateId
-  );
+    const debate = state.appData.debates.find(
+        (debate) => debate.id === debateId
+    );
 
-  const debateArguments = state.appData.arguments.filter(
-    (argument) => argument.debateId === debateId
-  );
+    const debateArguments = state.appData.arguments.filter(
+        (argument) => argument.debateId === debateId
+    );
 
-  const supportArguments = debateArguments.filter(
-    (argument) => argument.side === "support"
-  );
+    const supportArguments = debateArguments.filter(
+        (argument) => argument.side === "support"
+    );
 
-  const opposeArguments = debateArguments.filter(
-    (argument) => argument.side === "oppose"
-  );
+    const opposeArguments = debateArguments.filter(
+        (argument) => argument.side === "oppose"
+    );
 
-  if (!debate) {
-    return `
+    if (!debate) {
+        return `
       <h1>Debate Not Found</h1>
       <p>The debate you're looking for does not exist.</p>
     `;
-  }
+    }
 
-  const stats = getPositionStats(debateId);
+    const stats = getPositionStats(debateId);
 
-  return `
+    return `
     <article>
       <h1>${escapeHTML(debate.title)}</h1>
-      <p>By ${escapeHTML(getAuthorName(debate.authorId))} · ${formatTime(debate.createdAt)}</p>
-      
-      <p>${escapeHTML(debate.description)}</p>
+
+<p>
+    By ${escapeHTML(getAuthorName(debate.authorId))}
+    · ${formatTime(debate.createdAt)}
+</p>
+
+${state.auth.currentUser &&
+            state.auth.currentUser.id === debate.authorId
+            ? `
+            <button data-edit-debate="${debate.id}">
+                Edit Debate
+            </button>
+          `
+            : ""
+        }
+
+<p>${escapeHTML(debate.description)}</p>
 
       <p>
         <strong>Topic:</strong> ${escapeHTML(debate.topic)}
@@ -296,21 +310,21 @@ export function renderDebate(debateId) {
         <h2>Supporting Arguments</h2>
 
         ${supportArguments.length === 0
-      ? `
+            ? `
         <div class="empty-state">
             <p>No supporting arguments yet.</p>
             <span>Be the first to take a stand!</span>
         </div>
       `
-      : supportArguments
-        .map((argument) => {
-          const votes = getArgumentVoteStats(argument.id);
+            : supportArguments
+                .map((argument) => {
+                    const votes = getArgumentVoteStats(argument.id);
 
-          const responses = state.appData.responses.filter(
-            (response) => response.argumentId === argument.id
-          );
+                    const responses = state.appData.responses.filter(
+                        (response) => response.argumentId === argument.id
+                    );
 
-          return `
+                    return `
     <article class="argument-card support-argument">
 
         <div class="argument-author">
@@ -353,19 +367,19 @@ export function renderDebate(debateId) {
             <h4>Responses</h4>
 
             ${responses.length === 0
-              ? `<p class="no-responses">No responses yet.</p>`
-              : responses.map(response => {
+                            ? `<p class="no-responses">No responses yet.</p>`
+                            : responses.map(response => {
 
-                const stats = getResponseVoteStats(response.id);
+                                const stats = getResponseVoteStats(response.id);
 
-                return `
+                                return `
                             <div class="response">
 
                                 <div class="response-author">
                                     <strong>
                                         ${escapeHTML(
-                  getAuthorName(response.authorId)
-                )}
+                                    getAuthorName(response.authorId)
+                                )}
                                     </strong>
 
                                     <span>
@@ -397,8 +411,8 @@ export function renderDebate(debateId) {
 
                             </div>
                         `;
-              }).join("")
-            }
+                            }).join("")
+                        }
 
             <form
                 class="response-form"
@@ -420,30 +434,30 @@ export function renderDebate(debateId) {
     </article>
 `;
 
-        })
-        .join("")
-    }
+                })
+                .join("")
+        }
       </section>
 
       <section>
         <h2>Opposing Arguments</h2>
 
         ${opposeArguments.length === 0
-      ? `
+            ? `
         <div class="empty-state">
             <p>No opposing arguments yet.</p>
             <span>Be the first to challenge this position!</span>
         </div>
       `
-      : opposeArguments
-        .map((argument) => {
-          const votes = getArgumentVoteStats(argument.id);
+            : opposeArguments
+                .map((argument) => {
+                    const votes = getArgumentVoteStats(argument.id);
 
-          const responses = state.appData.responses.filter(
-            (response) => response.argumentId === argument.id
-          );
+                    const responses = state.appData.responses.filter(
+                        (response) => response.argumentId === argument.id
+                    );
 
-return `
+                    return `
     <article class="argument-card support-argument">
 
         <div class="argument-author">
@@ -485,23 +499,22 @@ return `
 
             <h4>Responses</h4>
 
-            ${
-                responses.length === 0
-                    ?`<p class="no-responses">
+            ${responses.length === 0
+                            ? `<p class="no-responses">
                           No responses yet. Start the conversation.
                       </p>`
-                    : responses.map(response => {
+                            : responses.map(response => {
 
-                        const stats = getResponseVoteStats(response.id);
+                                const stats = getResponseVoteStats(response.id);
 
-                        return `
+                                return `
                             <div class="response">
 
                                 <div class="response-author">
                                     <strong>
                                         ${escapeHTML(
-                                            getAuthorName(response.authorId)
-                                        )}
+                                    getAuthorName(response.authorId)
+                                )}
                                     </strong>
 
                                     <span>
@@ -533,8 +546,8 @@ return `
 
                             </div>
                         `;
-                    }).join("")
-            }
+                            }).join("")
+                        }
 
             <form
                 class="response-form"
@@ -555,9 +568,9 @@ return `
 
     </article>
 `;
-        })
-        .join("")
-    }
+                })
+                .join("")
+        }
       </section>
 
       
@@ -568,7 +581,7 @@ return `
 
 
 export function renderNotFound() {
-  return `
+    return `
         <h1>404</h1>
         <p>Page not found.</p>
     `;
@@ -576,16 +589,16 @@ export function renderNotFound() {
 
 export function renderNavbar() { //MAKING NAVBAR DYNAMIC DIFFERENT FOR LOGIN AND REGISTER
 
-  if (state.auth.isAuthenticated) {
-    return `
+    if (state.auth.isAuthenticated) {
+        return `
             <a href="/" data-link>Home</a>
             <a href="/create" data-link>new debate</a>
             <a href="/profile" data-link>Profile</a>
             <button id="logout-button">Logout</button>
         `;
-  }
+    }
 
-  return `
+    return `
         <a href="/" data-link>Home</a>
         <a href="/search" data-link>Search</a>
         <a href="/login" data-link>Login</a>
