@@ -4,11 +4,12 @@ import { registerUser } from "./auth.js";
 import { loginUser } from "./auth.js";
 import { renderNavbar } from "./ui.js";
 import { logoutUser } from "./auth.js";
-import { createDebate } from "./debates.js";
+import {createDebate, updateDebate} from "./debates.js";
 import { setPosition } from "./positions.js";
 import { createArgument } from "./arguments.js";
 import { voteOnArgument, voteOnResponse } from "./votes.js";
 import { createResponse } from "./responses.js";
+import { state } from "./state.js";
 
 const app = document.querySelector("#app");
 
@@ -84,6 +85,24 @@ document.addEventListener("click", (event) => {
         }
     }
     }
+    //edit-debate
+    if (event.target.dataset.editDebate) {
+
+    state.navigation.editingDebateId =
+        event.target.dataset.editDebate;
+
+    render();
+
+    return;
+}
+if (event.target.id === "cancel-edit") {
+
+    state.navigation.editingDebateId = null;
+
+    render();
+
+    return;
+}
 });
 
 document.addEventListener("submit", (event) => {
@@ -246,6 +265,43 @@ document.addEventListener("submit", (event) => {
 
     render();
     }
+
+    if (event.target.id === "edit-debate-form") {
+    event.preventDefault();
+
+    const form = event.target;
+
+    const title = form.querySelector("#edit-title").value.trim();
+    const description = form.querySelector("#edit-description").value.trim();
+    const topic = form.querySelector("#edit-topic").value.trim();
+
+    const tags = form
+        .querySelector("#edit-tags")
+        .value
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(tag => tag !== "");
+
+    const debateId = state.navigation.editingDebateId;
+
+    const result = updateDebate(debateId, {
+        title,
+        description,
+        topic,
+        tags
+    });
+
+    if (!result.success) {
+        console.log(result.message);
+        return;
+    }
+
+    // Leave edit mode after successful update
+    state.navigation.editingDebateId = null;
+
+    render();
+}
+
 
 });
 

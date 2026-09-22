@@ -7,7 +7,8 @@ export const state = {
 
     navigation: {
         currentView: "home",
-        currentDebateId: null
+        currentDebateId: null,
+        editingDebateId: null
     },
 
     appData: {

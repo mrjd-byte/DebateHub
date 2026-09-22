@@ -225,37 +225,97 @@ export function renderDebate(debateId) {
     `;
     }
 
+    const isEditing =
+        state.navigation.editingDebateId === debate.id;
+
     const stats = getPositionStats(debateId);
 
     return `
     <article>
-      <h1>${escapeHTML(debate.title)}</h1>
-
-<p>
-    By ${escapeHTML(getAuthorName(debate.authorId))}
-    · ${formatTime(debate.createdAt)}
-</p>
-
-${state.auth.currentUser &&
-            state.auth.currentUser.id === debate.authorId
+      ${
+        isEditing
             ? `
-            <button data-edit-debate="${debate.id}">
-                Edit Debate
-            </button>
+            <form id="edit-debate-form">
+
+                <label>
+                    Title
+                    <input
+                        type="text"
+                        id="edit-title"
+                        value="${escapeHTML(debate.title)}"
+                    >
+                </label>
+
+                <label>
+                    Description
+                    <textarea id="edit-description">${escapeHTML(debate.description)}</textarea>
+                </label>
+
+                <label>
+                    Topic
+                    <input
+                        type="text"
+                        id="edit-topic"
+                        value="${escapeHTML(debate.topic)}"
+                    >
+                </label>
+
+                <label>
+                    Tags
+                    <input
+                        type="text"
+                        id="edit-tags"
+                        value="${escapeHTML(debate.tags.join(", "))}"
+                    >
+                </label>
+
+                <button type="submit">
+                    Save Changes
+                </button>
+
+                <button
+                    type="button"
+                    id="cancel-edit"
+                >
+                    Cancel
+                </button>
+
+            </form>
           `
-            : ""
-        }
+            : `
+            <h1>${escapeHTML(debate.title)}</h1>
 
-<p>${escapeHTML(debate.description)}</p>
+            <p>
+                By ${escapeHTML(getAuthorName(debate.authorId))}
+                · ${formatTime(debate.createdAt)}
+            </p>
 
-      <p>
-        <strong>Topic:</strong> ${escapeHTML(debate.topic)}
-      </p>
+            ${
+                state.auth.currentUser &&
+                state.auth.currentUser.id === debate.authorId
+                    ? `
+                    <button data-edit-debate="${debate.id}">
+                        Edit Debate
+                    </button>
+                  `
+                    : ""
+            }
 
-      <div>
-        <strong>Tags:</strong>
-        ${debate.tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join(" ")}
-      </div>
+            <p>${escapeHTML(debate.description)}</p>
+
+            <p>
+                <strong>Topic:</strong>
+                ${escapeHTML(debate.topic)}
+            </p>
+
+            <div>
+                <strong>Tags:</strong>
+                ${debate.tags.map(
+                    (tag) => `<span>${escapeHTML(tag)}</span>`
+                ).join(" ")}
+            </div>
+          `
+      }
 
       <div>
         <button class="position-button support-button" data-position="support">
@@ -270,6 +330,7 @@ ${state.auth.currentUser &&
             Undecided
         </button>
       </div>
+
       <div>
         <h3>Current Positions</h3>
 
@@ -309,22 +370,23 @@ ${state.auth.currentUser &&
       <section>
         <h2>Supporting Arguments</h2>
 
-        ${supportArguments.length === 0
-            ? `
+        ${
+            supportArguments.length === 0
+                ? `
         <div class="empty-state">
             <p>No supporting arguments yet.</p>
             <span>Be the first to take a stand!</span>
         </div>
       `
-            : supportArguments
-                .map((argument) => {
-                    const votes = getArgumentVoteStats(argument.id);
+                : supportArguments
+                    .map((argument) => {
+                        const votes = getArgumentVoteStats(argument.id);
 
-                    const responses = state.appData.responses.filter(
-                        (response) => response.argumentId === argument.id
-                    );
+                        const responses = state.appData.responses.filter(
+                            (response) => response.argumentId === argument.id
+                        );
 
-                    return `
+                        return `
     <article class="argument-card support-argument">
 
         <div class="argument-author">
@@ -366,20 +428,21 @@ ${state.auth.currentUser &&
 
             <h4>Responses</h4>
 
-            ${responses.length === 0
-                            ? `<p class="no-responses">No responses yet.</p>`
-                            : responses.map(response => {
+            ${
+                responses.length === 0
+                    ? `<p class="no-responses">No responses yet.</p>`
+                    : responses
+                        .map(response => {
+                            const stats = getResponseVoteStats(response.id);
 
-                                const stats = getResponseVoteStats(response.id);
-
-                                return `
+                            return `
                             <div class="response">
 
                                 <div class="response-author">
                                     <strong>
                                         ${escapeHTML(
-                                    getAuthorName(response.authorId)
-                                )}
+                                            getAuthorName(response.authorId)
+                                        )}
                                     </strong>
 
                                     <span>
@@ -411,8 +474,8 @@ ${state.auth.currentUser &&
 
                             </div>
                         `;
-                            }).join("")
-                        }
+                        }).join("")
+            }
 
             <form
                 class="response-form"
@@ -433,31 +496,31 @@ ${state.auth.currentUser &&
 
     </article>
 `;
-
-                })
-                .join("")
+                    })
+                    .join("")
         }
       </section>
 
       <section>
         <h2>Opposing Arguments</h2>
 
-        ${opposeArguments.length === 0
-            ? `
+        ${
+            opposeArguments.length === 0
+                ? `
         <div class="empty-state">
             <p>No opposing arguments yet.</p>
             <span>Be the first to challenge this position!</span>
         </div>
       `
-            : opposeArguments
-                .map((argument) => {
-                    const votes = getArgumentVoteStats(argument.id);
+                : opposeArguments
+                    .map((argument) => {
+                        const votes = getArgumentVoteStats(argument.id);
 
-                    const responses = state.appData.responses.filter(
-                        (response) => response.argumentId === argument.id
-                    );
+                        const responses = state.appData.responses.filter(
+                            (response) => response.argumentId === argument.id
+                        );
 
-                    return `
+                        return `
     <article class="argument-card support-argument">
 
         <div class="argument-author">
@@ -499,22 +562,23 @@ ${state.auth.currentUser &&
 
             <h4>Responses</h4>
 
-            ${responses.length === 0
-                            ? `<p class="no-responses">
+            ${
+                responses.length === 0
+                    ? `<p class="no-responses">
                           No responses yet. Start the conversation.
                       </p>`
-                            : responses.map(response => {
+                    : responses
+                        .map(response => {
+                            const stats = getResponseVoteStats(response.id);
 
-                                const stats = getResponseVoteStats(response.id);
-
-                                return `
+                            return `
                             <div class="response">
 
                                 <div class="response-author">
                                     <strong>
                                         ${escapeHTML(
-                                    getAuthorName(response.authorId)
-                                )}
+                                            getAuthorName(response.authorId)
+                                        )}
                                     </strong>
 
                                     <span>
@@ -546,8 +610,8 @@ ${state.auth.currentUser &&
 
                             </div>
                         `;
-                            }).join("")
-                        }
+                        }).join("")
+            }
 
             <form
                 class="response-form"
@@ -568,12 +632,11 @@ ${state.auth.currentUser &&
 
     </article>
 `;
-                })
-                .join("")
+                    })
+                    .join("")
         }
       </section>
 
-      
     </article>
   `;
 }
