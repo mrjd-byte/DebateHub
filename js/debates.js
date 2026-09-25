@@ -87,3 +87,82 @@ export function updateDebate(debateId, { title, description, topic, tags }) {
         debate
     };
 }
+
+export function deleteDebate(debateId) {
+
+    // User must be logged in
+    if (!state.auth.currentUser) {
+        return {
+            success: false,
+            message: "You must be logged in to delete a debate."
+        };
+    }
+
+    // Find the debate
+    const debate = state.appData.debates.find(
+        debate => debate.id === debateId
+    );
+
+    if (!debate) {
+        return {
+            success: false,
+            message: "Debate not found."
+        };
+    }
+
+    // Only the author can delete the debate
+    if (debate.authorId !== state.auth.currentUser.id) {
+        return {
+            success: false,
+            message: "You can only delete your own debate."
+        };
+    }
+
+    // Find all arguments belonging to this debate
+    const debateArguments = state.appData.arguments.filter(
+        argument => argument.debateId === debateId
+    );
+
+    // Get their IDs so we can remove related responses and votes
+    const argumentIds = debateArguments.map(
+        argument => argument.id
+    );
+
+    // Find responses belonging to those arguments
+    const responseIds = state.appData.responses
+        .filter(response => argumentIds.includes(response.argumentId))
+        .map(response => response.id);
+
+    // Remove the debate
+    state.appData.debates = state.appData.debates.filter(
+        debate => debate.id !== debateId
+    );
+
+    // Remove its arguments
+    state.appData.arguments = state.appData.arguments.filter(
+        argument => argument.debateId !== debateId
+    );
+
+    // Remove responses belonging to those arguments
+    state.appData.responses = state.appData.responses.filter(
+        response => !argumentIds.includes(response.argumentId)
+    );
+
+    // Remove votes belonging to deleted arguments/responses
+    state.appData.votes = state.appData.votes.filter(
+        vote =>
+            !argumentIds.includes(vote.argumentId) &&
+            !responseIds.includes(vote.responseId)
+    );
+
+    // Remove users' positions on this debate
+    state.appData.positions = state.appData.positions.filter(
+        position => position.debateId !== debateId
+    );
+
+    saveState();
+
+    return {
+        success: true
+    };
+}
