@@ -297,6 +297,9 @@ export function renderDebate(debateId) {
                     <button data-edit-debate="${debate.id}">
                         Edit Debate
                     </button>
+                    <button data-delete-debate="${debate.id}">
+                        Delete Debate
+                    </button>
                   `
                     : ""
             }

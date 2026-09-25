@@ -9,8 +9,17 @@ export function saveState() {
 export function loadState() {
     const saved = localStorage.getItem(STORAGE_KEY);
 
-    if (saved) {
+    if (!saved) return;
+
+    try {
         Object.assign(state, JSON.parse(saved));
+
+        // Editing is temporary UI state.
+        // Never restore edit mode after reloading the application.
+        state.navigation.editingDebateId = null;
+
+    } catch (error) {
+        console.error("Failed to load saved state:", error);
     }
 }
 

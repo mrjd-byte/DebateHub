@@ -4,7 +4,7 @@ import { registerUser } from "./auth.js";
 import { loginUser } from "./auth.js";
 import { renderNavbar } from "./ui.js";
 import { logoutUser } from "./auth.js";
-import {createDebate, updateDebate} from "./debates.js";
+import {createDebate, updateDebate, deleteDebate} from "./debates.js";
 import { setPosition } from "./positions.js";
 import { createArgument } from "./arguments.js";
 import { voteOnArgument, voteOnResponse } from "./votes.js";
@@ -98,6 +98,40 @@ document.addEventListener("click", (event) => {
 if (event.target.id === "cancel-edit") {
 
     state.navigation.editingDebateId = null;
+
+    render();
+
+    return;
+}
+//Delete debate
+const deleteButton = event.target.closest("[data-delete-debate]");
+
+if (deleteButton) {
+
+    console.log("DELETE BUTTON CLICKED");
+
+    const debateId = deleteButton.dataset.deleteDebate;
+
+    console.log("Debate ID:", debateId);
+
+    const confirmed = confirm(
+        "Are you sure you want to delete this debate?"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const result = deleteDebate(debateId);
+
+    console.log("Delete result:", result);
+
+    if (!result.success) {
+        console.log(result.message);
+        return;
+    }
+
+    history.pushState({}, "", "/");
 
     render();
 
