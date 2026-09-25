@@ -55,3 +55,63 @@ export function createArgument({ debateId, side, content }) {
         argument
     };
 }
+
+export function updateArgument(argumentId, { content, side }) {
+
+    // User must be logged in
+    if (!state.auth.currentUser) {
+        return {
+            success: false,
+            message: "You must be logged in to update an argument."
+        };
+    }
+
+    // Find the argument
+    const argument = state.appData.arguments.find(
+        argument => argument.id === argumentId
+    );
+
+    if (!argument) {
+        return {
+            success: false,
+            message: "Argument not found."
+        };
+    }
+
+    // Only the author can update their argument
+    if (argument.authorId !== state.auth.currentUser.id) {
+        return {
+            success: false,
+            message: "You can only update your own argument."
+        };
+    }
+
+    // Validate content
+    if (!content) {
+        return {
+            success: false,
+            message: "Argument cannot be empty."
+        };
+    }
+
+    // Validate side
+    const validSides = ["support", "oppose"];
+
+    if (!validSides.includes(side)) {
+        return {
+            success: false,
+            message: "Invalid argument side."
+        };
+    }
+
+    // Update the existing argument
+    argument.content = content;
+    argument.side = side;
+
+    saveState();
+
+    return {
+        success: true,
+        argument
+    };
+}

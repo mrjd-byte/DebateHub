@@ -220,9 +220,9 @@ export function renderDebate(debateId) {
 
     if (!debate) {
         return `
-      <h1>Debate Not Found</h1>
-      <p>The debate you're looking for does not exist.</p>
-    `;
+            <h1>Debate Not Found</h1>
+            <p>The debate you're looking for does not exist.</p>
+        `;
     }
 
     const isEditing =
@@ -232,9 +232,10 @@ export function renderDebate(debateId) {
 
     return `
     <article>
-      ${
-        isEditing
-            ? `
+
+        ${
+            isEditing
+                ? `
             <form id="edit-debate-form">
 
                 <label>
@@ -281,8 +282,8 @@ export function renderDebate(debateId) {
                 </button>
 
             </form>
-          `
-            : `
+            `
+                : `
             <h1>${escapeHTML(debate.title)}</h1>
 
             <p>
@@ -294,13 +295,14 @@ export function renderDebate(debateId) {
                 state.auth.currentUser &&
                 state.auth.currentUser.id === debate.authorId
                     ? `
-                    <button data-edit-debate="${debate.id}">
-                        Edit Debate
-                    </button>
-                    <button data-delete-debate="${debate.id}">
-                        Delete Debate
-                    </button>
-                  `
+                <button data-edit-debate="${debate.id}">
+                    Edit Debate
+                </button>
+
+                <button data-delete-debate="${debate.id}">
+                    Delete Debate
+                </button>
+                `
                     : ""
             }
 
@@ -313,335 +315,559 @@ export function renderDebate(debateId) {
 
             <div>
                 <strong>Tags:</strong>
-                ${debate.tags.map(
-                    (tag) => `<span>${escapeHTML(tag)}</span>`
-                ).join(" ")}
+                ${debate.tags
+                    .map(
+                        (tag) =>
+                            `<span>${escapeHTML(tag)}</span>`
+                    )
+                    .join(" ")}
             </div>
-          `
-      }
+            `
+        }
 
-      <div>
-        <button class="position-button support-button" data-position="support">
-            Support
-        </button>
-
-        <button class="position-button oppose-button" data-position="oppose">
-            Oppose
-        </button>
-
-        <button class="position-button undecided-button" data-position="undecided">
-            Undecided
-        </button>
-      </div>
-
-      <div>
-        <h3>Current Positions</h3>
-
-        <p>
-          Support: ${stats.supportPercentage}% (${stats.support})
-        </p>
-
-        <p>
-          Oppose: ${stats.opposePercentage}% (${stats.oppose})
-        </p>
-
-        <p>
-          Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
-        </p>
-      </div>
-
-      <section>
-        <h2>Add an Argument</h2>
-
-        <form id="argument-form">
-          <textarea
-            id="argument-content"
-            placeholder="Write your argument..."
-          ></textarea>
-
-          <select id="argument-side">
-            <option value="support">Support</option>
-            <option value="oppose">Oppose</option>
-          </select>
-
-          <button type="submit">Submit Argument</button>
-
-          <p id="argument-message"></p>
-        </form>
-      </section>
-
-      <section>
-        <h2>Supporting Arguments</h2>
-
-        ${
-            supportArguments.length === 0
-                ? `
-        <div class="empty-state">
-            <p>No supporting arguments yet.</p>
-            <span>Be the first to take a stand!</span>
-        </div>
-      `
-                : supportArguments
-                    .map((argument) => {
-                        const votes = getArgumentVoteStats(argument.id);
-
-                        const responses = state.appData.responses.filter(
-                            (response) => response.argumentId === argument.id
-                        );
-
-                        return `
-    <article class="argument-card support-argument">
-
-        <div class="argument-author">
-            <strong>${escapeHTML(getAuthorName(argument.authorId))}</strong>
-            <span>· ${formatTime(argument.createdAt)}</span>
-        </div>
-
-        <p class="argument-content">
-            ${escapeHTML(argument.content)}
-        </p>
-
-        <div class="argument-actions">
-
+        <div>
             <button
-                data-vote="up"
-                data-argument-id="${argument.id}"
+                class="position-button support-button"
+                data-position="support"
             >
-                ↑ ${votes.upvotes}
+                Support
             </button>
 
             <button
-                data-vote="down"
-                data-argument-id="${argument.id}"
+                class="position-button oppose-button"
+                data-position="oppose"
             >
-                ↓ ${votes.downvotes}
+                Oppose
             </button>
 
-            <button type="button">
-                💬 ${responses.length}
+            <button
+                class="position-button undecided-button"
+                data-position="undecided"
+            >
+                Undecided
             </button>
-
-            <button type="button">
-                Reply
-            </button>
-
         </div>
 
-        <section class="responses">
+        <div>
+            <h3>Current Positions</h3>
 
-            <h4>Responses</h4>
+            <p>
+                Support: ${stats.supportPercentage}% (${stats.support})
+            </p>
 
-            ${
-                responses.length === 0
-                    ? `<p class="no-responses">No responses yet.</p>`
-                    : responses
-                        .map(response => {
-                            const stats = getResponseVoteStats(response.id);
+            <p>
+                Oppose: ${stats.opposePercentage}% (${stats.oppose})
+            </p>
 
-                            return `
-                            <div class="response">
+            <p>
+                Undecided: ${stats.undecidedPercentage}% (${stats.undecided})
+            </p>
+        </div>
 
-                                <div class="response-author">
-                                    <strong>
-                                        ${escapeHTML(
-                                            getAuthorName(response.authorId)
-                                        )}
-                                    </strong>
+        <section>
+            <h2>Add an Argument</h2>
 
-                                    <span>
-                                        · ${formatTime(response.createdAt)}
-                                    </span>
-                                </div>
-
-                                <p class="response-content">
-                                    ${escapeHTML(response.content)}
-                                </p>
-
-                                <div class="response-actions">
-
-                                    <button
-                                        data-vote="up"
-                                        data-response-id="${response.id}"
-                                    >
-                                        👍 ${stats.upvotes}
-                                    </button>
-
-                                    <button
-                                        data-vote="down"
-                                        data-response-id="${response.id}"
-                                    >
-                                        👎 ${stats.downvotes}
-                                    </button>
-
-                                </div>
-
-                            </div>
-                        `;
-                        }).join("")
-            }
-
-            <form
-                class="response-form"
-                data-argument-id="${argument.id}"
-            >
+            <form id="argument-form">
 
                 <textarea
-                    placeholder="Respond to this argument..."
+                    id="argument-content"
+                    placeholder="Write your argument..."
                 ></textarea>
 
+                <select id="argument-side">
+                    <option value="support">Support</option>
+                    <option value="oppose">Oppose</option>
+                </select>
+
                 <button type="submit">
-                    Reply
+                    Submit Argument
                 </button>
 
+                <p id="argument-message"></p>
+
             </form>
+        </section>
+
+        <!-- ========================= -->
+        <!-- SUPPORTING ARGUMENTS -->
+        <!-- ========================= -->
+
+        <section>
+            <h2>Supporting Arguments</h2>
+
+            ${
+                supportArguments.length === 0
+                    ? `
+                <div class="empty-state">
+                    <p>No supporting arguments yet.</p>
+                    <span>Be the first to take a stand!</span>
+                </div>
+                `
+                    : supportArguments
+                          .map((argument) => {
+                              const votes =
+                                  getArgumentVoteStats(argument.id);
+
+                              const responses =
+                                  state.appData.responses.filter(
+                                      (response) =>
+                                          response.argumentId ===
+                                          argument.id
+                                  );
+
+                              const isEditingArgument =
+                                  state.navigation.editingArgumentId ===
+                                  argument.id;
+
+                              return `
+                    <article class="argument-card support-argument">
+
+                        <div class="argument-author">
+                            <strong>
+                                ${escapeHTML(
+                                    getAuthorName(argument.authorId)
+                                )}
+                            </strong>
+
+                            <span>
+                                · ${formatTime(argument.createdAt)}
+                            </span>
+                        </div>
+
+                        ${
+                            isEditingArgument
+                                ? `
+                            <form
+                                class="edit-argument-form"
+                                data-argument-id="${argument.id}"
+                            >
+
+                                <textarea
+                                    class="edit-argument-content"
+                                >${escapeHTML(argument.content)}</textarea>
+
+                                <select class="edit-argument-side">
+
+                                    <option
+                                        value="support"
+                                        ${
+                                            argument.side === "support"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Support
+                                    </option>
+
+                                    <option
+                                        value="oppose"
+                                        ${
+                                            argument.side === "oppose"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Oppose
+                                    </option>
+
+                                </select>
+
+                                <button type="submit">
+                                    Save Changes
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="cancel-edit-argument"
+                                >
+                                    Cancel
+                                </button>
+
+                            </form>
+                            `
+                                : `
+                            <p class="argument-content">
+                                ${escapeHTML(argument.content)}
+                            </p>
+
+                            ${
+                                state.auth.currentUser &&
+                                state.auth.currentUser.id ===
+                                    argument.authorId
+                                    ? `
+                                <button
+                                    type="button"
+                                    data-edit-argument="${argument.id}"
+                                >
+                                    Edit
+                                </button>
+                                `
+                                    : ""
+                            }
+                            `
+                        }
+
+                        <div class="argument-actions">
+
+                            <button
+                                data-vote="up"
+                                data-argument-id="${argument.id}"
+                            >
+                                ↑ ${votes.upvotes}
+                            </button>
+
+                            <button
+                                data-vote="down"
+                                data-argument-id="${argument.id}"
+                            >
+                                ↓ ${votes.downvotes}
+                            </button>
+
+                            <button type="button">
+                                💬 ${responses.length}
+                            </button>
+
+                            <button type="button">
+                                Reply
+                            </button>
+
+                        </div>
+
+                        <section class="responses">
+
+                            <h4>Responses</h4>
+
+                            ${
+                                responses.length === 0
+                                    ? `
+                                <p class="no-responses">
+                                    No responses yet.
+                                </p>
+                                `
+                                    : responses
+                                          .map((response) => {
+                                              const stats =
+                                                  getResponseVoteStats(
+                                                      response.id
+                                                  );
+
+                                              return `
+                                <div class="response">
+
+                                    <div class="response-author">
+
+                                        <strong>
+                                            ${escapeHTML(
+                                                getAuthorName(
+                                                    response.authorId
+                                                )
+                                            )}
+                                        </strong>
+
+                                        <span>
+                                            · ${formatTime(
+                                                response.createdAt
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                    <p class="response-content">
+                                        ${escapeHTML(response.content)}
+                                    </p>
+
+                                    <div class="response-actions">
+
+                                        <button
+                                            data-vote="up"
+                                            data-response-id="${response.id}"
+                                        >
+                                            👍 ${stats.upvotes}
+                                        </button>
+
+                                        <button
+                                            data-vote="down"
+                                            data-response-id="${response.id}"
+                                        >
+                                            👎 ${stats.downvotes}
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                                `;
+                                          })
+                                          .join("")
+                            }
+
+                            <form
+                                class="response-form"
+                                data-argument-id="${argument.id}"
+                            >
+
+                                <textarea
+                                    placeholder="Respond to this argument..."
+                                ></textarea>
+
+                                <button type="submit">
+                                    Reply
+                                </button>
+
+                            </form>
+
+                        </section>
+
+                    </article>
+                    `;
+                          })
+                          .join("")
+            }
+
+        </section>
+
+        <!-- ========================= -->
+        <!-- OPPOSING ARGUMENTS -->
+        <!-- ========================= -->
+
+        <section>
+            <h2>Opposing Arguments</h2>
+
+            ${
+                opposeArguments.length === 0
+                    ? `
+                <div class="empty-state">
+                    <p>No opposing arguments yet.</p>
+                    <span>
+                        Be the first to challenge this position!
+                    </span>
+                </div>
+                `
+                    : opposeArguments
+                          .map((argument) => {
+                              const votes =
+                                  getArgumentVoteStats(argument.id);
+
+                              const responses =
+                                  state.appData.responses.filter(
+                                      (response) =>
+                                          response.argumentId ===
+                                          argument.id
+                                  );
+
+                              const isEditingArgument =
+                                  state.navigation.editingArgumentId ===
+                                  argument.id;
+
+                              return `
+                    <article class="argument-card oppose-argument">
+
+                        <div class="argument-author">
+
+                            <strong>
+                                ${escapeHTML(
+                                    getAuthorName(argument.authorId)
+                                )}
+                            </strong>
+
+                            <span>
+                                · ${formatTime(argument.createdAt)}
+                            </span>
+
+                        </div>
+
+                        ${
+                            isEditingArgument
+                                ? `
+                            <form
+                                class="edit-argument-form"
+                                data-argument-id="${argument.id}"
+                            >
+
+                                <textarea
+                                    class="edit-argument-content"
+                                >${escapeHTML(argument.content)}</textarea>
+
+                                <select class="edit-argument-side">
+
+                                    <option
+                                        value="support"
+                                        ${
+                                            argument.side === "support"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Support
+                                    </option>
+
+                                    <option
+                                        value="oppose"
+                                        ${
+                                            argument.side === "oppose"
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        Oppose
+                                    </option>
+
+                                </select>
+
+                                <button type="submit">
+                                    Save Changes
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="cancel-edit-argument"
+                                >
+                                    Cancel
+                                </button>
+
+                            </form>
+                            `
+                                : `
+                            <p class="argument-content">
+                                ${escapeHTML(argument.content)}
+                            </p>
+
+                            ${
+                                state.auth.currentUser &&
+                                state.auth.currentUser.id ===
+                                    argument.authorId
+                                    ? `
+                                <button
+                                    type="button"
+                                    data-edit-argument="${argument.id}"
+                                >
+                                    Edit
+                                </button>
+                                `
+                                    : ""
+                            }
+                            `
+                        }
+
+                        <div class="argument-actions">
+
+                            <button
+                                data-vote="up"
+                                data-argument-id="${argument.id}"
+                            >
+                                ↑ ${votes.upvotes}
+                            </button>
+
+                            <button
+                                data-vote="down"
+                                data-argument-id="${argument.id}"
+                            >
+                                ↓ ${votes.downvotes}
+                            </button>
+
+                            <button type="button">
+                                💬 ${responses.length}
+                            </button>
+
+                            <button type="button">
+                                Reply
+                            </button>
+
+                        </div>
+
+                        <section class="responses">
+
+                            <h4>Responses</h4>
+
+                            ${
+                                responses.length === 0
+                                    ? `
+                                <p class="no-responses">
+                                    No responses yet.
+                                </p>
+                                `
+                                    : responses
+                                          .map((response) => {
+                                              const stats =
+                                                  getResponseVoteStats(
+                                                      response.id
+                                                  );
+
+                                              return `
+                                <div class="response">
+
+                                    <div class="response-author">
+
+                                        <strong>
+                                            ${escapeHTML(
+                                                getAuthorName(
+                                                    response.authorId
+                                                )
+                                            )}
+                                        </strong>
+
+                                        <span>
+                                            · ${formatTime(
+                                                response.createdAt
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                    <p class="response-content">
+                                        ${escapeHTML(response.content)}
+                                    </p>
+
+                                    <div class="response-actions">
+
+                                        <button
+                                            data-vote="up"
+                                            data-response-id="${response.id}"
+                                        >
+                                            👍 ${stats.upvotes}
+                                        </button>
+
+                                        <button
+                                            data-vote="down"
+                                            data-response-id="${response.id}"
+                                        >
+                                            👎 ${stats.downvotes}
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                                `;
+                                          })
+                                          .join("")
+                            }
+
+                            <form
+                                class="response-form"
+                                data-argument-id="${argument.id}"
+                            >
+
+                                <textarea
+                                    placeholder="Respond to this argument..."
+                                ></textarea>
+
+                                <button type="submit">
+                                    Reply
+                                </button>
+
+                            </form>
+
+                        </section>
+
+                    </article>
+                    `;
+                          })
+                          .join("")
+            }
 
         </section>
 
     </article>
-`;
-                    })
-                    .join("")
-        }
-      </section>
-
-      <section>
-        <h2>Opposing Arguments</h2>
-
-        ${
-            opposeArguments.length === 0
-                ? `
-        <div class="empty-state">
-            <p>No opposing arguments yet.</p>
-            <span>Be the first to challenge this position!</span>
-        </div>
-      `
-                : opposeArguments
-                    .map((argument) => {
-                        const votes = getArgumentVoteStats(argument.id);
-
-                        const responses = state.appData.responses.filter(
-                            (response) => response.argumentId === argument.id
-                        );
-
-                        return `
-    <article class="argument-card support-argument">
-
-        <div class="argument-author">
-            <strong>${escapeHTML(getAuthorName(argument.authorId))}</strong>
-            <span>· ${formatTime(argument.createdAt)}</span>
-        </div>
-
-        <p class="argument-content">
-            ${escapeHTML(argument.content)}
-        </p>
-
-        <div class="argument-actions">
-
-            <button
-                data-vote="up"
-                data-argument-id="${argument.id}"
-            >
-                ↑ ${votes.upvotes}
-            </button>
-
-            <button
-                data-vote="down"
-                data-argument-id="${argument.id}"
-            >
-                ↓ ${votes.downvotes}
-            </button>
-
-            <button type="button">
-                💬 ${responses.length}
-            </button>
-
-            <button type="button">
-                Reply
-            </button>
-
-        </div>
-
-        <section class="responses">
-
-            <h4>Responses</h4>
-
-            ${
-                responses.length === 0
-                    ? `<p class="no-responses">
-                          No responses yet. Start the conversation.
-                      </p>`
-                    : responses
-                        .map(response => {
-                            const stats = getResponseVoteStats(response.id);
-
-                            return `
-                            <div class="response">
-
-                                <div class="response-author">
-                                    <strong>
-                                        ${escapeHTML(
-                                            getAuthorName(response.authorId)
-                                        )}
-                                    </strong>
-
-                                    <span>
-                                        · ${formatTime(response.createdAt)}
-                                    </span>
-                                </div>
-
-                                <p class="response-content">
-                                    ${escapeHTML(response.content)}
-                                </p>
-
-                                <div class="response-actions">
-
-                                    <button
-                                        data-vote="up"
-                                        data-response-id="${response.id}"
-                                    >
-                                        👍 ${stats.upvotes}
-                                    </button>
-
-                                    <button
-                                        data-vote="down"
-                                        data-response-id="${response.id}"
-                                    >
-                                        👎 ${stats.downvotes}
-                                    </button>
-
-                                </div>
-
-                            </div>
-                        `;
-                        }).join("")
-            }
-
-            <form
-                class="response-form"
-                data-argument-id="${argument.id}"
-            >
-
-                <textarea
-                    placeholder="Respond to this argument..."
-                ></textarea>
-
-                <button type="submit">
-                    Reply
-                </button>
-
-            </form>
-
-        </section>
-
-    </article>
-`;
-                    })
-                    .join("")
-        }
-      </section>
-
-    </article>
-  `;
+    `;
 }
 
 

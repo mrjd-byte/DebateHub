@@ -6,9 +6,10 @@ export const state = {
     },
 
     navigation: {
-        currentView: "home",
-        currentDebateId: null,
-        editingDebateId: null
+    currentView: "home",
+    currentDebateId: null,
+    editingDebateId: null,
+    editingArgumentId: null
     },
 
     appData: {

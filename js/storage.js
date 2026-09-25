@@ -17,6 +17,7 @@ export function loadState() {
         // Editing is temporary UI state.
         // Never restore edit mode after reloading the application.
         state.navigation.editingDebateId = null;
+        state.navigation.editingArgumentId = null;
 
     } catch (error) {
         console.error("Failed to load saved state:", error);

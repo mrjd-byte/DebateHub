@@ -6,7 +6,7 @@ import { renderNavbar } from "./ui.js";
 import { logoutUser } from "./auth.js";
 import {createDebate, updateDebate, deleteDebate} from "./debates.js";
 import { setPosition } from "./positions.js";
-import { createArgument } from "./arguments.js";
+import { createArgument, updateArgument } from "./arguments.js";
 import { voteOnArgument, voteOnResponse } from "./votes.js";
 import { createResponse } from "./responses.js";
 import { state } from "./state.js";
@@ -137,6 +137,29 @@ if (deleteButton) {
 
     return;
 }
+
+//update the arguments
+const editArgumentButton =
+    event.target.closest("[data-edit-argument]");
+
+if (editArgumentButton) {
+    const argumentId =
+        editArgumentButton.dataset.editArgument;
+
+    state.navigation.editingArgumentId = argumentId;
+
+    render();
+
+    return;
+}
+if (event.target.closest(".cancel-edit-argument")) {
+    state.navigation.editingArgumentId = null;
+
+    render();
+
+    return;
+}
+
 });
 
 document.addEventListener("submit", (event) => {
@@ -334,6 +357,42 @@ document.addEventListener("submit", (event) => {
     state.navigation.editingDebateId = null;
 
     render();
+}
+
+//update-arg
+if (event.target.classList.contains("edit-argument-form")) {
+    event.preventDefault();
+
+    const form = event.target;
+
+    const argumentId = form.dataset.argumentId;
+
+    const content =
+        form
+            .querySelector(".edit-argument-content")
+            .value
+            .trim();
+
+    const side =
+        form
+            .querySelector(".edit-argument-side")
+            .value;
+
+    const result = updateArgument(argumentId, {
+        content,
+        side
+    });
+
+    if (!result.success) {
+        console.log(result.message);
+        return;
+    }
+
+    state.navigation.editingArgumentId = null;
+
+    render();
+
+    return;
 }
 
 
