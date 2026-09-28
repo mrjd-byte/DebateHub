@@ -52,30 +52,39 @@ export function renderHome() {
     const debates = state.appData.debates;
 
     return `
-        <h1>Debate Platform</h1>
-        <p>Explore debates and different perspectives.</p>
+        <div class="home-hero">
+            <h1 class="hero-title">Debate Platform</h1>
+            <p class="hero-subtitle">Explore debates and different perspectives.</p>
+        </div>
 
-        <section>
-            <h2>Available Debates</h2>
+        <section class="debates-section">
+            <h2 class="section-title">Available Debates</h2>
 
-            ${debates.length === 0
-            ? "<p>No debates yet.</p>"
-            : debates.map(debate => `
-                        <article>
-                            <h3>
-                                <a href="/debate/${debate.id}" data-link>
-                                    ${escapeHTML(debate.title)}
-                                </a>
-                            </h3>
+            <div class="debates-list">
+                ${debates.length === 0
+                ? `
+                    <div class="empty-state">
+                        <p>No debates yet.</p>
+                        <span>Be the first to create one!</span>
+                    </div>
+                `
+                : debates.map(debate => `
+                    <article class="debate-card">
+                        <h3 class="debate-card-title">
+                            <a href="/debate/${debate.id}" data-link>
+                                ${escapeHTML(debate.title)}
+                            </a>
+                        </h3>
 
-                            <p>${escapeHTML(debate.description)}</p>
+                        <p class="debate-card-description">${escapeHTML(debate.description)}</p>
 
-                            <p>
-                                Topic: ${escapeHTML(debate.topic)}
-                            </p>
-                        </article>
-                    `).join("")
-        }
+                        <div class="debate-card-meta">
+                            <span class="topic-pill">Topic: ${escapeHTML(debate.topic)}</span>
+                        </div>
+                    </article>
+                `).join("")
+            }
+            </div>
         </section>
     `;
 }
@@ -883,18 +892,36 @@ export function renderNavbar() { //MAKING NAVBAR DYNAMIC DIFFERENT FOR LOGIN AND
 
     if (state.auth.isAuthenticated) {
         return `
-            <a href="/" data-link>Home</a>
-            <a href="/create" data-link>new debate</a>
-            <a href="/profile" data-link>Profile</a>
-            <button id="logout-button">Logout</button>
+            <div class="nav-left">
+                <a href="/" data-link>Home</a>
+                <a href="/create" data-link>New Debate</a>
+            </div>
+
+            <a href="/" class="nav-logo" data-link>
+                <span class="logo-debate">Debate</span><span class="logo-hub">Hub</span>
+            </a>
+
+            <div class="nav-right">
+                <a href="/profile" data-link>Profile</a>
+                <button id="logout-button">Logout</button>
+            </div>
         `;
     }
 
     return `
-        <a href="/" data-link>Home</a>
-        <a href="/search" data-link>Search</a>
-        <a href="/login" data-link>Login</a>
-        <a href="/register" data-link>Register</a>
+        <div class="nav-left">
+            <a href="/" data-link>Home</a>
+            <a href="/search" data-link>Search</a>
+        </div>
+
+        <a href="/" class="nav-logo" data-link>
+            <span class="logo-debate">Debate</span><span class="logo-hub">Hub</span>
+        </a>
+
+        <div class="nav-right">
+            <a href="/login" data-link>Login</a>
+            <a href="/register" data-link>Register</a>
+        </div>
     `;
 }
 // router.js
