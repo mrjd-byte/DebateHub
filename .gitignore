@@ -1,13 +1,26 @@
-node_modules/
-.env
-.env.local
-.env.*.local
+# Operating System Files
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
 
-dist/
-build/
+# VS Code Settings
+.vscode/
+*.code-workspace
 
+# Temporary Files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Logs
 *.log
 npm-debug.log*
 
-.DS_Store
-Thumbs.db
+# Browser & Cache Files
+.cache/
+
+# Local Environment & Dependencies
+node_modules/
+.env
+.env.local
