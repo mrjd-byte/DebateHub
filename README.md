@@ -6,7 +6,7 @@ A modern, client-side Single Page Application (SPA) designed to foster structure
 
 ## Project Overview
 
-**DebateHub** is an interactive debate and discussion platform where users can explore trending topics, express their stances, construct reasoned arguments, and engage in constructive dialogue. 
+**DebateHub** is an interactive debate and discussion platform where users can express their stances, construct reasoned arguments, and engage in constructive dialogue. 
 
 Unlike traditional forums where discussions quickly devolve into unstructured comment threads, DebateHub provides a purpose-built environment that separates opposing viewpoints into clear perspectives. Users can register an account, create debates on diverse topics, cast stance votes (Support, Oppose, Undecided), submit categorized arguments, engage in threaded replies, and evaluate contributions through community voting.
 
@@ -61,7 +61,7 @@ DebateHub contains only fully implemented, client-side features:
 
 ### Responses
 - **Reply to Arguments**: Users can post direct, targeted replies to any specific argument using an expandable reply panel.
-- **Nested Discussions**: Responses render hierarchically directly under the parent argument thread card with author avatars, names, and timestamps.
+- **Nested Discussions**: Responses render hierarchically directly under the parent argument thread card with author names, and timestamps.
 - **Response Voting**: Nested responses feature independent upvote and downvote counters, enabling the community to evaluate replies on their own merits.
 
 ---
