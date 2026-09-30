@@ -198,29 +198,6 @@ npx serve .
 ```
 Open your browser at the URL shown in the terminal.
 
----
-
-## Screenshots Section
-
-<!-- Replace the placeholder paths below with actual screenshot assets when captured -->
-
-### Home Page
-![Home Page](screenshots/home-page.png)
-*Browse available debates, view topics, and access navigation.*
-
-### Debate Room
-![Debate Room](screenshots/debate-room.png)
-*Split-panel layout featuring debate control room, stance statistics, supportive arguments, and opposing arguments.*
-
-### Authentication Pages
-![Authentication Pages](screenshots/auth-pages.png)
-*Account registration and login screens with validation feedback.*
-
-### Profile Page
-![Profile Page](screenshots/profile-page.png)
-*User profile view displaying authenticated account details.*
-
----
 
 ## Future Improvements
 
