@@ -22,7 +22,7 @@ function requireAuth(view) {
 export function router() {
     const path = window.location.pathname;
 
-    if (path === "/") {
+    if (path === "/" || path === "/index.html") {
         return renderHome();
 
     } else if (path === "/login") {
