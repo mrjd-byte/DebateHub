@@ -124,6 +124,8 @@ DebateHub/
 ├── .gitignore
 ├── favicon.ico
 ├── index.html
+├── landing.html
+├── landing.css
 ├── README.md
 ├── css/
 │   └── style.css
