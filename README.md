@@ -287,11 +287,3 @@ The following improvements reflect realistic next steps for evolving DebateHub i
 - **Notifications**: Implement real-time or inbox notifications when users reply to an argument or when a followed debate receives new activity.
 
 ---
-
-## Development Guidelines
-
-To maintain code quality and project consistency:
-
-- **Clean Folder Organization**: Keep modular separations clean. JavaScript domain logic resides in dedicated files under `js/`, styling rules remain in `css/`, and views are modularized in `ui.js`.
-- **Meaningful Commits**: Write clear, descriptive commit messages adhering to conventional commit standards (e.g., `feat: implement argument voting`, `fix: cascade delete response votes on debate deletion`).
-- **No Sensitive Information Committed**: Never commit sensitive secrets, private credentials, or environment files (`.env`). Even though the current app uses browser `localStorage`, ensure simulated authentication data and secrets are never committed to version control.
