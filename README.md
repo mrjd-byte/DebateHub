@@ -198,6 +198,81 @@ npx serve .
 ```
 Open your browser at the URL shown in the terminal.
 
+---
+
+## Screenshots
+
+### Landing Page
+
+Modern landing page introducing DebateHub, explaining the problem, solution, features, workflow, and providing entry into the application.
+
+<div align="center">
+
+![Landing Page - Hero](screenshots/LandingPage1.png)
+
+</div>
+
+<br/>
+
+<div align="center">
+
+![Landing Page - Workflow](screenshots/LandingPage_Home.png)
+
+</div>
+
+<br/>
+
+<div align="center">
+
+![Landing Page - Why DebateHub](screenshots/LandingPage_Why.png)
+
+</div>
+
+---
+
+### Debate Feed / Home Page
+
+Main debate discovery page displaying available debates with topic information and descriptions.
+
+<div align="center">
+
+![Debate Feed / Home Page](screenshots/AllDebatePage.png)
+
+</div>
+
+---
+
+### Debate Details Page
+
+Detailed debate view showing debate information, stance selection, community responses, nested replies, and voting interactions.
+
+<div align="center">
+
+![Debate Details - Header and Stances](screenshots/debatepage1.png)
+
+</div>
+
+<br/>
+
+<div align="center">
+
+![Debate Details - Arguments and Responses](screenshots/debatepage2.png)
+
+</div>
+
+---
+
+### Create Debate
+
+Interface for users to create new debates with title, description, topics, and tags.
+
+<div align="center">
+
+![Create Debate](screenshots/CreateDebate.png)
+
+</div>
+
+---
 
 ## Future Improvements
 
