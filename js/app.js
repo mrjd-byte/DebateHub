@@ -57,7 +57,9 @@ document.addEventListener("click", async (event) => {
         const parts = path.split("/");
         const debateId = parts[2];
 
-        const result = setPosition(debateId, value);
+        positionButton.disabled = true;
+        const result = await setPosition(debateId, value);
+        positionButton.disabled = false;
 
         if (!result.success) {
             console.log(result.message);
@@ -68,30 +70,41 @@ document.addEventListener("click", async (event) => {
         render();
     }
 
-    //voting in arguments
-    if (event.target.dataset.vote) {
+    // voting in arguments & responses
+    const voteBtn = event.target.closest("[data-vote]");
+    if (voteBtn) {
 
-    const value = event.target.dataset.vote;
+        const value = voteBtn.dataset.vote;
+        const argumentId = voteBtn.dataset.argumentId;
+        const responseId = voteBtn.dataset.responseId;
 
-    const argumentId = event.target.dataset.argumentId;
-    const responseId = event.target.dataset.responseId;
+        voteBtn.disabled = true;
+        if (argumentId) {
 
-    if (argumentId) {
+            const result = await voteOnArgument(argumentId, value);
+            voteBtn.disabled = false;
 
-        const result = voteOnArgument(argumentId, value);
+            if (!result.success) {
+                console.log(result.message);
+                window.alert(result.message);
+                return;
+            }
 
-        if (result.success) {
+            render();
+
+        } else if (responseId) {
+
+            const result = await voteOnResponse(responseId, value);
+            voteBtn.disabled = false;
+
+            if (!result.success) {
+                console.log(result.message);
+                window.alert(result.message);
+                return;
+            }
+
             render();
         }
-
-    } else if (responseId) {
-
-        const result = voteOnResponse(responseId, value);
-
-        if (result.success) {
-            render();
-        }
-    }
     }
     //edit-debate
     if (event.target.dataset.editDebate) {

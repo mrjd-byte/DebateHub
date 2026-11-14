@@ -11,6 +11,7 @@ import {
 import { auth, db } from "./firebase.js";
 import { state } from "./state.js";
 import { saveState } from "./storage.js";
+import { fetchVotesForResponse } from "./votes.js";
 
 function normalizeResponse(id, data, parentDebateId, parentArgumentId) {
     let createdAt = data.createdAt;
@@ -77,6 +78,18 @@ export async function fetchResponsesForArgument(debateId, argumentId) {
 
         state.appData.responses = [...otherResponses, ...firestoreResponses, ...localOnlyResponses];
         state.responsesLoading = false;
+
+        // Fetch votes for these responses in parallel
+        try {
+            const votePromises = firestoreResponses.map(resp =>
+                fetchVotesForResponse(debateId, argumentId, resp.id).catch(err => {
+                    console.warn("Could not load votes for response:", resp.id, err);
+                })
+            );
+            await Promise.all(votePromises);
+        } catch (voteErr) {
+            console.warn("Error fetching votes for responses:", voteErr);
+        }
 
         return {
             success: true,
@@ -278,6 +291,21 @@ export async function deleteResponse(responseId, { debateId, argumentId } = {}) 
     }
 
     try {
+        // Clean up child votes in Firestore subcollection
+        try {
+            const votesCol = collection(db, "debates", targetDebateId, "arguments", targetArgumentId, "responses", responseId, "votes");
+            const votesSnap = await getDocs(votesCol);
+            const delVotePromises = [];
+            votesSnap.forEach(vDoc => {
+                delVotePromises.push(deleteDoc(vDoc.ref).catch(err => {
+                    console.warn("Could not delete response vote:", err);
+                }));
+            });
+            await Promise.all(delVotePromises);
+        } catch (cleanupErr) {
+            console.warn("Response votes cleanup warning:", cleanupErr);
+        }
+
         const respRef = doc(db, "debates", targetDebateId, "arguments", targetArgumentId, "responses", responseId);
         await deleteDoc(respRef);
 

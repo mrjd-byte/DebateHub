@@ -62,90 +62,210 @@ service cloud.firestore {
 
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
-    }
 
-    // Subcollection: arguments
-    match /debates/{debateId}/arguments/{argumentId} {
-      // Public users can read arguments
-      allow read: if true;
+      // Subcollection: positions under debates
+      match /positions/{userId} {
+        // Public users can read positions
+        allow read: if true;
 
-      // Authenticated users can create arguments
-      // authorId must equal request.auth.uid
-      // Parent debate must exist
-      allow create: if request.auth != null
-        && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.debateId == debateId
-        && exists(/databases/$(database)/documents/debates/$(debateId))
-        && request.resource.data.keys().hasAll([
-          'content', 'authorId', 'debateId', 'side', 'createdAt', 'updatedAt'
-        ])
-        && request.resource.data.keys().hasOnly([
-          'content', 'authorId', 'debateId', 'side', 'createdAt', 'updatedAt'
-        ])
-        && request.resource.data.content is string
-        && request.resource.data.content.size() > 0
-        && request.resource.data.side in ['support', 'oppose']
-        && request.resource.data.createdAt is timestamp
-        && request.resource.data.updatedAt is timestamp;
+        // Authenticated users can create their position
+        // Document ID and userId field must equal request.auth.uid
+        // Parent debate must exist
+        allow create: if request.auth != null
+          && request.auth.uid == userId
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.debateId == debateId
+          && exists(/databases/$(database)/documents/debates/$(debateId))
+          && request.resource.data.keys().hasAll([
+            'userId', 'debateId', 'value', 'createdAt', 'updatedAt'
+          ])
+          && request.resource.data.keys().hasOnly([
+            'userId', 'debateId', 'value', 'createdAt', 'updatedAt'
+          ])
+          && request.resource.data.value in ['support', 'oppose', 'undecided']
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.updatedAt is timestamp;
 
-      // Only the original author can update their argument
-      // Ownership and debate relationship cannot be changed
-      allow update: if request.auth != null
-        && resource.data.authorId == request.auth.uid
-        && request.resource.data.authorId == resource.data.authorId
-        && request.resource.data.debateId == resource.data.debateId
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorId', 'debateId', 'createdAt'])
-        && request.resource.data.content is string
-        && request.resource.data.content.size() > 0
-        && request.resource.data.side in ['support', 'oppose']
-        && request.resource.data.updatedAt is timestamp;
+        // Only the position owner can update their position
+        // debateId, userId, and createdAt cannot be changed
+        allow update: if request.auth != null
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.debateId == resource.data.debateId
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'debateId', 'createdAt'])
+          && request.resource.data.value in ['support', 'oppose', 'undecided']
+          && request.resource.data.updatedAt is timestamp;
 
-      // Only the original author can delete their argument
-      allow delete: if request.auth != null
-        && resource.data.authorId == request.auth.uid;
-    }
+        // Only the position owner can delete their position
+        allow delete: if request.auth != null
+          && resource.data.userId == request.auth.uid;
+      }
 
-    // Subcollection: responses under arguments
-    match /debates/{debateId}/arguments/{argumentId}/responses/{responseId} {
-      // Public users can read responses
-      allow read: if true;
+      // Subcollection: arguments under debates
+      match /arguments/{argumentId} {
+        // Public users can read arguments
+        allow read: if true;
 
-      // Authenticated users can create responses
-      // authorId must match request.auth.uid
-      // Parent debate and argument must exist
-      allow create: if request.auth != null
-        && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.debateId == debateId
-        && request.resource.data.argumentId == argumentId
-        && exists(/databases/$(database)/documents/debates/$(debateId))
-        && exists(/databases/$(database)/documents/debates/$(debateId)/arguments/$(argumentId))
-        && request.resource.data.keys().hasAll([
-          'content', 'authorId', 'debateId', 'argumentId', 'createdAt', 'updatedAt'
-        ])
-        && request.resource.data.keys().hasOnly([
-          'content', 'authorId', 'debateId', 'argumentId', 'createdAt', 'updatedAt'
-        ])
-        && request.resource.data.content is string
-        && request.resource.data.content.size() > 0
-        && request.resource.data.createdAt is timestamp
-        && request.resource.data.updatedAt is timestamp;
+        // Authenticated users can create arguments
+        // authorId must equal request.auth.uid
+        // Parent debate must exist
+        allow create: if request.auth != null
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.debateId == debateId
+          && exists(/databases/$(database)/documents/debates/$(debateId))
+          && request.resource.data.keys().hasAll([
+            'content', 'authorId', 'debateId', 'side', 'createdAt', 'updatedAt'
+          ])
+          && request.resource.data.keys().hasOnly([
+            'content', 'authorId', 'debateId', 'side', 'createdAt', 'updatedAt'
+          ])
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 0
+          && request.resource.data.side in ['support', 'oppose']
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.updatedAt is timestamp;
 
-      // Only the original author can update their response
-      // Ownership and parent relationships cannot be changed
-      allow update: if request.auth != null
-        && resource.data.authorId == request.auth.uid
-        && request.resource.data.authorId == resource.data.authorId
-        && request.resource.data.debateId == resource.data.debateId
-        && request.resource.data.argumentId == resource.data.argumentId
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorId', 'debateId', 'argumentId', 'createdAt'])
-        && request.resource.data.content is string
-        && request.resource.data.content.size() > 0
-        && request.resource.data.updatedAt is timestamp;
+        // Only the original author can update their argument
+        // Ownership and debate relationship cannot be changed
+        allow update: if request.auth != null
+          && resource.data.authorId == request.auth.uid
+          && request.resource.data.authorId == resource.data.authorId
+          && request.resource.data.debateId == resource.data.debateId
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorId', 'debateId', 'createdAt'])
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 0
+          && request.resource.data.side in ['support', 'oppose']
+          && request.resource.data.updatedAt is timestamp;
 
-      // Only the original author can delete their response
-      allow delete: if request.auth != null
-        && resource.data.authorId == request.auth.uid;
+        // Only the original author can delete their argument
+        allow delete: if request.auth != null
+          && resource.data.authorId == request.auth.uid;
+
+        // Subcollection: votes under arguments
+        match /votes/{userId} {
+          // Public users can read argument votes
+          allow read: if true;
+
+          // Authenticated users can create a vote
+          // Document ID and userId field must equal request.auth.uid
+          // Parent debate and argument must exist
+          allow create: if request.auth != null
+            && request.auth.uid == userId
+            && request.resource.data.userId == request.auth.uid
+            && request.resource.data.debateId == debateId
+            && request.resource.data.argumentId == argumentId
+            && exists(/databases/$(database)/documents/debates/$(debateId))
+            && exists(/databases/$(database)/documents/debates/$(debateId)/arguments/$(argumentId))
+            && request.resource.data.keys().hasAll([
+              'userId', 'debateId', 'argumentId', 'value', 'createdAt', 'updatedAt'
+            ])
+            && request.resource.data.keys().hasOnly([
+              'userId', 'debateId', 'argumentId', 'value', 'createdAt', 'updatedAt'
+            ])
+            && request.resource.data.value in ['up', 'down']
+            && request.resource.data.createdAt is timestamp
+            && request.resource.data.updatedAt is timestamp;
+
+          // Only the voter can change their vote
+          allow update: if request.auth != null
+            && resource.data.userId == request.auth.uid
+            && request.resource.data.userId == resource.data.userId
+            && request.resource.data.debateId == resource.data.debateId
+            && request.resource.data.argumentId == resource.data.argumentId
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'debateId', 'argumentId', 'createdAt'])
+            && request.resource.data.value in ['up', 'down']
+            && request.resource.data.updatedAt is timestamp;
+
+          // Only the voter can delete/remove their vote (toggle off)
+          allow delete: if request.auth != null
+            && resource.data.userId == request.auth.uid;
+        }
+
+        // Subcollection: responses under arguments
+        match /responses/{responseId} {
+          // Public users can read responses
+          allow read: if true;
+
+          // Authenticated users can create responses
+          // authorId must match request.auth.uid
+          // Parent debate and argument must exist
+          allow create: if request.auth != null
+            && request.resource.data.authorId == request.auth.uid
+            && request.resource.data.debateId == debateId
+            && request.resource.data.argumentId == argumentId
+            && exists(/databases/$(database)/documents/debates/$(debateId))
+            && exists(/databases/$(database)/documents/debates/$(debateId)/arguments/$(argumentId))
+            && request.resource.data.keys().hasAll([
+              'content', 'authorId', 'debateId', 'argumentId', 'createdAt', 'updatedAt'
+            ])
+            && request.resource.data.keys().hasOnly([
+              'content', 'authorId', 'debateId', 'argumentId', 'createdAt', 'updatedAt'
+            ])
+            && request.resource.data.content is string
+            && request.resource.data.content.size() > 0
+            && request.resource.data.createdAt is timestamp
+            && request.resource.data.updatedAt is timestamp;
+
+          // Only the original author can update their response
+          // Ownership and parent relationships cannot be changed
+          allow update: if request.auth != null
+            && resource.data.authorId == request.auth.uid
+            && request.resource.data.authorId == resource.data.authorId
+            && request.resource.data.debateId == resource.data.debateId
+            && request.resource.data.argumentId == resource.data.argumentId
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorId', 'debateId', 'argumentId', 'createdAt'])
+            && request.resource.data.content is string
+            && request.resource.data.content.size() > 0
+            && request.resource.data.updatedAt is timestamp;
+
+          // Only the original author can delete their response
+          allow delete: if request.auth != null
+            && resource.data.authorId == request.auth.uid;
+
+          // Subcollection: votes under responses
+          match /votes/{userId} {
+            // Public users can read response votes
+            allow read: if true;
+
+            // Authenticated users can create a vote
+            // Document ID and userId field must equal request.auth.uid
+            // Parent debate, argument, and response must exist
+            allow create: if request.auth != null
+              && request.auth.uid == userId
+              && request.resource.data.userId == request.auth.uid
+              && request.resource.data.debateId == debateId
+              && request.resource.data.argumentId == argumentId
+              && request.resource.data.responseId == responseId
+              && exists(/databases/$(database)/documents/debates/$(debateId))
+              && exists(/databases/$(database)/documents/debates/$(debateId)/arguments/$(argumentId))
+              && exists(/databases/$(database)/documents/debates/$(debateId)/arguments/$(argumentId)/responses/$(responseId))
+              && request.resource.data.keys().hasAll([
+                'userId', 'debateId', 'argumentId', 'responseId', 'value', 'createdAt', 'updatedAt'
+              ])
+              && request.resource.data.keys().hasOnly([
+                'userId', 'debateId', 'argumentId', 'responseId', 'value', 'createdAt', 'updatedAt'
+              ])
+              && request.resource.data.value in ['up', 'down']
+              && request.resource.data.createdAt is timestamp
+              && request.resource.data.updatedAt is timestamp;
+
+            // Only the voter can change their vote
+            allow update: if request.auth != null
+              && resource.data.userId == request.auth.uid
+              && request.resource.data.userId == resource.data.userId
+              && request.resource.data.debateId == resource.data.debateId
+              && request.resource.data.argumentId == resource.data.argumentId
+              && request.resource.data.responseId == resource.data.responseId
+              && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'debateId', 'argumentId', 'responseId', 'createdAt'])
+              && request.resource.data.value in ['up', 'down']
+              && request.resource.data.updatedAt is timestamp;
+
+            // Only the voter can delete/remove their vote (toggle off)
+            allow delete: if request.auth != null
+              && resource.data.userId == request.auth.uid;
+          }
+        }
+      }
     }
   }
 }
-

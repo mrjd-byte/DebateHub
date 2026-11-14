@@ -274,6 +274,19 @@ export async function deleteDebate(debateId) {
                     console.warn("Could not delete subcollection argument:", err.message);
                 }));
             }
+            // Clean up positions subcollection
+            try {
+                const posCol = collection(db, "debates", debateId, "positions");
+                const posSnap = await getDocs(posCol);
+                posSnap.forEach(pDoc => {
+                    deletePromises.push(deleteDoc(pDoc.ref).catch(err => {
+                        console.warn("Could not delete subcollection position:", err.message);
+                    }));
+                });
+            } catch (posErr) {
+                // Ignore positions cleanup error
+            }
+
             await Promise.all(deletePromises);
         } catch (cleanupError) {
             console.warn("Subcollection cleanup warning:", cleanupError.message);

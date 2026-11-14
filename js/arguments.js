@@ -12,6 +12,8 @@ import { auth, db } from "./firebase.js";
 import { state } from "./state.js";
 import { saveState } from "./storage.js";
 import { fetchResponsesForArgument } from "./responses.js";
+import { fetchPositionsForDebate } from "./positions.js";
+import { fetchVotesForArgument } from "./votes.js";
 
 function normalizeArgument(id, data, parentDebateId) {
     let createdAt = data.createdAt;
@@ -79,16 +81,29 @@ export async function fetchArguments(debateId) {
         state.appData.arguments = [...otherArguments, ...firestoreArguments, ...localOnlyArgs];
         state.argumentsLoading = false;
 
-        // Fetch nested responses for all arguments in parallel
+        // Fetch debate positions in parallel
         try {
-            const respPromises = firestoreArguments.map(arg =>
-                fetchResponsesForArgument(debateId, arg.id).catch(err => {
+            await fetchPositionsForDebate(debateId).catch(posErr => {
+                console.warn("Could not load positions for debate:", debateId, posErr);
+            });
+        } catch (posErr) {
+            console.warn("Error fetching positions:", posErr);
+        }
+
+        // Fetch votes and nested responses for all arguments in parallel
+        try {
+            const childPromises = firestoreArguments.map(async arg => {
+                const argVotePromise = fetchVotesForArgument(debateId, arg.id).catch(err => {
+                    console.warn("Could not load votes for argument:", arg.id, err);
+                });
+                const respPromise = fetchResponsesForArgument(debateId, arg.id).catch(err => {
                     console.warn("Could not load responses for argument:", arg.id, err);
-                })
-            );
-            await Promise.all(respPromises);
+                });
+                await Promise.all([argVotePromise, respPromise]);
+            });
+            await Promise.all(childPromises);
         } catch (respErr) {
-            console.warn("Error fetching responses for debate arguments:", respErr);
+            console.warn("Error fetching child data for debate arguments:", respErr);
         }
 
         return {
@@ -296,6 +311,21 @@ export async function deleteArgument(argumentId, debateId) {
     const targetDebateId = debateId || argument.debateId;
 
     try {
+        // Clean up child votes on this argument in Firestore
+        try {
+            const argVotesCol = collection(db, "debates", targetDebateId, "arguments", argumentId, "votes");
+            const argVotesSnap = await getDocs(argVotesCol);
+            const delVotePromises = [];
+            argVotesSnap.forEach(vDoc => {
+                delVotePromises.push(deleteDoc(vDoc.ref).catch(err => {
+                    console.warn("Could not delete argument vote:", err);
+                }));
+            });
+            await Promise.all(delVotePromises);
+        } catch (cleanupErr) {
+            console.warn("Argument votes cleanup warning:", cleanupErr);
+        }
+
         // Clean up child responses in Firestore subcollection
         try {
             const respCol = collection(db, "debates", targetDebateId, "arguments", argumentId, "responses");
