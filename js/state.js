@@ -1,6 +1,7 @@
 export const state = {
 
     debatesLoading: true,
+    argumentsLoading: false,
 
     auth: {
         status: "loading",

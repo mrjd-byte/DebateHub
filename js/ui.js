@@ -306,7 +306,10 @@ function renderArgumentThread(argument) {
                 <span class="c-timestamp">· ${formatTime(argument.createdAt)}</span>
 
                 ${state.auth.currentUser && state.auth.currentUser.id === argument.authorId
-                    ? `<button type="button" class="btn-subtle" data-edit-argument="${argument.id}">Edit</button>`
+                    ? `
+                    <button type="button" class="btn-subtle" data-edit-argument="${argument.id}">Edit</button>
+                    <button type="button" class="btn-subtle btn-danger-subtle" data-delete-argument="${argument.id}">Delete</button>
+                    `
                     : ""
                 }
             </div>
@@ -323,6 +326,7 @@ function renderArgumentThread(argument) {
                         <button type="submit">Save Changes</button>
                         <button type="button" class="cancel-edit-argument">Cancel</button>
                     </div>
+                    <p class="edit-argument-message"></p>
                 </form>
                 `
                 : `
@@ -581,7 +585,13 @@ export function renderDebate(debateId) {
                     <h3 class="community-col-title text-teal">Supportive Arguments</h3>
 
                     <div class="community-col-list">
-                        ${supportArguments.length === 0
+                        ${state.argumentsLoading && supportArguments.length === 0
+                            ? `
+                            <div class="empty-state-mini">
+                                <p>Loading arguments...</p>
+                            </div>
+                            `
+                            : supportArguments.length === 0
                             ? `
                             <div class="empty-state-mini">
                                 <p>No supportive arguments yet.</p>
@@ -598,7 +608,13 @@ export function renderDebate(debateId) {
                     <h3 class="community-col-title text-orange">Opposing Arguments</h3>
 
                     <div class="community-col-list">
-                        ${opposeArguments.length === 0
+                        ${state.argumentsLoading && opposeArguments.length === 0
+                            ? `
+                            <div class="empty-state-mini">
+                                <p>Loading arguments...</p>
+                            </div>
+                            `
+                            : opposeArguments.length === 0
                             ? `
                             <div class="empty-state-mini">
                                 <p>No opposing arguments yet.</p>

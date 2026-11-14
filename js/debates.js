@@ -253,6 +253,21 @@ export async function deleteDebate(debateId) {
     }
 
     try {
+        // Clean up subcollection argument documents in Firestore
+        try {
+            const argsCollection = collection(db, "debates", debateId, "arguments");
+            const argsSnapshot = await getDocs(argsCollection);
+            const deletePromises = [];
+            argsSnapshot.forEach(argDoc => {
+                deletePromises.push(deleteDoc(argDoc.ref).catch(err => {
+                    console.warn("Could not delete subcollection argument:", err.message);
+                }));
+            });
+            await Promise.all(deletePromises);
+        } catch (cleanupError) {
+            console.warn("Subcollection argument cleanup warning:", cleanupError.message);
+        }
+
         const debateRef = doc(db, "debates", debateId);
         await deleteDoc(debateRef);
 

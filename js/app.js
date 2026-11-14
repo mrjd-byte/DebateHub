@@ -4,7 +4,7 @@ import { registerUser, loginUser, logoutUser, subscribeToAuthChanges } from "./a
 import { renderNavbar } from "./ui.js";
 import {createDebate, updateDebate, deleteDebate, fetchDebates} from "./debates.js";
 import { setPosition } from "./positions.js";
-import { createArgument, updateArgument } from "./arguments.js";
+import { createArgument, updateArgument, deleteArgument, fetchArguments } from "./arguments.js";
 import { voteOnArgument, voteOnResponse } from "./votes.js";
 import { createResponse } from "./responses.js";
 import { state } from "./state.js";
@@ -26,6 +26,11 @@ document.addEventListener("click", async (event) => {
         const url = link.getAttribute("href");
 
         window.history.pushState({}, "", url);
+
+        if (url.startsWith("/debate/")) {
+            const debateId = url.split("/")[2];
+            fetchArguments(debateId).then(() => render());
+        }
 
         render();
         return;
@@ -56,6 +61,7 @@ document.addEventListener("click", async (event) => {
 
         if (!result.success) {
             console.log(result.message);
+            window.alert(result.message);
             return;
         }
 
@@ -163,6 +169,29 @@ if (event.target.closest(".cancel-edit-argument")) {
 
     render();
 
+    return;
+}
+
+// Delete argument
+const deleteArgBtn = event.target.closest("[data-delete-argument]");
+if (deleteArgBtn) {
+    const argumentId = deleteArgBtn.dataset.deleteArgument;
+    const confirmed = confirm("Are you sure you want to delete this argument?");
+    if (!confirmed) return;
+
+    deleteArgBtn.disabled = true;
+
+    const parts = window.location.pathname.split("/");
+    const debateId = parts[2];
+
+    const result = await deleteArgument(argumentId, debateId);
+    if (!result.success) {
+        deleteArgBtn.disabled = false;
+        alert(result.message);
+        return;
+    }
+
+    render();
     return;
 }
 
@@ -288,20 +317,27 @@ document.addEventListener("submit", async (event) => {
         const parts = window.location.pathname.split("/");
         const debateId = parts[2];
 
-        const result = createArgument({
+        const submitBtn = form.querySelector("button[type='submit']");
+        const message = document.querySelector("#argument-message");
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (message) message.textContent = "Submitting argument...";
+
+        const result = await createArgument({
             debateId,
             side,
             content
         });
 
-        const message = document.querySelector("#argument-message");
-
         if (!result.success) {
-            message.textContent = result.message;
+            if (submitBtn) submitBtn.disabled = false;
+            if (message) message.textContent = result.message;
             return;
         }
 
-        message.textContent = "Argument submitted!";
+        form.querySelector("#argument-content").value = "";
+        if (submitBtn) submitBtn.disabled = false;
+        if (message) message.textContent = "Argument submitted!";
 
         render();
     }
@@ -398,12 +434,24 @@ if (event.target.classList.contains("edit-argument-form")) {
             .querySelector(".edit-argument-side")
             .value;
 
-    const result = updateArgument(argumentId, {
+    const submitBtn = form.querySelector("button[type='submit']");
+    const message = form.querySelector(".edit-argument-message");
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (message) message.textContent = "Saving changes...";
+
+    const result = await updateArgument(argumentId, {
         content,
         side
     });
 
     if (!result.success) {
+        if (submitBtn) submitBtn.disabled = false;
+        if (message) {
+            message.textContent = result.message;
+        } else {
+            alert(result.message);
+        }
         console.log(result.message);
         return;
     }
@@ -420,12 +468,23 @@ if (event.target.classList.contains("edit-argument-form")) {
 
 
 window.addEventListener("popstate", () => {
+    const path = window.location.pathname;
+    if (path.startsWith("/debate/")) {
+        const debateId = path.split("/")[2];
+        fetchArguments(debateId).then(() => render());
+    }
     render();
 });
 
 loadState();
 render();
 subscribeToAuthChanges(render);
+
+const initialPath = window.location.pathname;
+if (initialPath.startsWith("/debate/")) {
+    const initialDebateId = initialPath.split("/")[2];
+    fetchArguments(initialDebateId).then(() => render());
+}
 
 fetchDebates().then(() => {
     render();

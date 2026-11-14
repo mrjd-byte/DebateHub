@@ -63,6 +63,47 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
     }
+
+    // Subcollection: arguments
+    match /debates/{debateId}/arguments/{argumentId} {
+      // Public users can read arguments
+      allow read: if true;
+
+      // Authenticated users can create arguments
+      // authorId must equal request.auth.uid
+      // Parent debate must exist
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.debateId == debateId
+        && exists(/databases/$(database)/documents/debates/$(debateId))
+        && request.resource.data.keys().hasAll([
+          'content', 'authorId', 'debateId', 'side', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'content', 'authorId', 'debateId', 'side', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.side in ['support', 'oppose']
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+
+      // Only the original author can update their argument
+      // Ownership and debate relationship cannot be changed
+      allow update: if request.auth != null
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.debateId == resource.data.debateId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorId', 'debateId', 'createdAt'])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.side in ['support', 'oppose']
+        && request.resource.data.updatedAt is timestamp;
+
+      // Only the original author can delete their argument
+      allow delete: if request.auth != null
+        && resource.data.authorId == request.auth.uid;
+    }
   }
 }
 

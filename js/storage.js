@@ -33,6 +33,7 @@ export function loadState() {
             error: null
         };
         state.debatesLoading = true;
+        state.argumentsLoading = false;
         state.appData.users = (state.appData.users || []).map(
             ({ password, ...user }) => user
         );
