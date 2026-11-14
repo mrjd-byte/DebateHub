@@ -6,7 +6,7 @@ import {createDebate, updateDebate, deleteDebate, fetchDebates} from "./debates.
 import { setPosition } from "./positions.js";
 import { createArgument, updateArgument, deleteArgument, fetchArguments } from "./arguments.js";
 import { voteOnArgument, voteOnResponse } from "./votes.js";
-import { createResponse } from "./responses.js";
+import { createResponse, updateResponse, deleteResponse, fetchResponsesForArgument } from "./responses.js";
 import { state } from "./state.js";
 
 const app = document.querySelector("#app");
@@ -195,6 +195,41 @@ if (deleteArgBtn) {
     return;
 }
 
+// Edit response
+const editRespBtn = event.target.closest("[data-edit-response]");
+if (editRespBtn) {
+    state.navigation.editingResponseId = editRespBtn.dataset.editResponse;
+    render();
+    return;
+}
+if (event.target.closest(".cancel-edit-response")) {
+    state.navigation.editingResponseId = null;
+    render();
+    return;
+}
+
+// Delete response
+const deleteRespBtn = event.target.closest("[data-delete-response]");
+if (deleteRespBtn) {
+    const responseId = deleteRespBtn.dataset.deleteResponse;
+    const argumentId = deleteRespBtn.dataset.argumentId;
+    const confirmed = confirm("Are you sure you want to delete this reply?");
+    if (!confirmed) return;
+
+    deleteRespBtn.disabled = true;
+    const debateId = window.location.pathname.split("/")[2];
+
+    const result = await deleteResponse(responseId, { debateId, argumentId });
+    if (!result.success) {
+        deleteRespBtn.disabled = false;
+        alert(result.message);
+        return;
+    }
+
+    render();
+    return;
+}
+
 });
 
 document.addEventListener("submit", async (event) => {
@@ -344,27 +379,75 @@ document.addEventListener("submit", async (event) => {
 
     //response
     if (event.target.classList.contains("response-form")) {
-    event.preventDefault();
+        event.preventDefault();
 
-    const form = event.target;
+        const form = event.target;
+        const content = form.querySelector("textarea").value.trim();
+        const argumentId = form.dataset.argumentId;
+        const debateId = window.location.pathname.split("/")[2];
 
-    const content = form.querySelector("textarea").value.trim();
+        const submitBtn = form.querySelector("button[type='submit']");
+        const message = form.querySelector(".response-message");
 
-    const argumentId = form.dataset.argumentId;
+        if (submitBtn) submitBtn.disabled = true;
+        if (message) message.textContent = "Posting reply...";
 
-    const result = createResponse({
-        argumentId,
-        content
-    });
+        const result = await createResponse({
+            debateId,
+            argumentId,
+            content
+        });
 
-    if (!result.success) {
-        form.querySelector(".response-message").textContent =
-            result.message;
+        if (!result.success) {
+            if (submitBtn) submitBtn.disabled = false;
+            if (message) message.textContent = result.message;
+            return;
+        }
 
+        form.querySelector("textarea").value = "";
+        if (submitBtn) submitBtn.disabled = false;
+        if (message) message.textContent = "";
+
+        render();
         return;
     }
 
-    render();
+    //edit-response
+    if (event.target.classList.contains("edit-response-form")) {
+        event.preventDefault();
+
+        const form = event.target;
+        const responseId = form.dataset.responseId;
+        const argumentId = form.dataset.argumentId;
+        const debateId = window.location.pathname.split("/")[2];
+        const content = form.querySelector(".edit-response-content").value.trim();
+
+        const submitBtn = form.querySelector("button[type='submit']");
+        const message = form.querySelector(".edit-response-message");
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (message) message.textContent = "Saving changes...";
+
+        const result = await updateResponse(responseId, {
+            debateId,
+            argumentId,
+            content
+        });
+
+        if (!result.success) {
+            if (submitBtn) submitBtn.disabled = false;
+            if (message) {
+                message.textContent = result.message;
+            } else {
+                alert(result.message);
+            }
+            return;
+        }
+
+        state.navigation.editingResponseId = null;
+
+        render();
+        return;
     }
 
     if (event.target.id === "edit-debate-form") {

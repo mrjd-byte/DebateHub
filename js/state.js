@@ -2,6 +2,7 @@ export const state = {
 
     debatesLoading: true,
     argumentsLoading: false,
+    responsesLoading: false,
 
     auth: {
         status: "loading",
@@ -14,7 +15,8 @@ export const state = {
     currentView: "home",
     currentDebateId: null,
     editingDebateId: null,
-    editingArgumentId: null
+    editingArgumentId: null,
+    editingResponseId: null
     },
 
     appData: {

@@ -253,6 +253,7 @@ function renderAvatar(username) {
 function renderNestedResponse(response, argumentId) {
     const stats = getResponseVoteStats(response.id);
     const authorName = getAuthorName(response.authorId);
+    const isEditingResponse = state.navigation.editingResponseId === response.id;
 
     return `
     <div class="nested-response-card">
@@ -260,9 +261,31 @@ function renderNestedResponse(response, argumentId) {
             ${renderAvatar(authorName)}
             <span class="c-author-name">${escapeHTML(authorName)}</span>
             <span class="c-timestamp">· ${formatTime(response.createdAt)}</span>
+
+            ${state.auth.currentUser && state.auth.currentUser.id === response.authorId
+                ? `
+                <button type="button" class="btn-subtle" data-edit-response="${response.id}">Edit</button>
+                <button type="button" class="btn-subtle btn-danger-subtle" data-delete-response="${response.id}" data-argument-id="${argumentId}">Delete</button>
+                `
+                : ""
+            }
         </div>
 
-        <p class="c-response-content">${escapeHTML(response.content)}</p>
+        ${isEditingResponse
+            ? `
+            <form class="edit-response-form" data-response-id="${response.id}" data-argument-id="${argumentId}">
+                <textarea class="edit-response-content" required>${escapeHTML(response.content)}</textarea>
+                <div class="form-actions-row">
+                    <button type="submit">Save Changes</button>
+                    <button type="button" class="cancel-edit-response">Cancel</button>
+                </div>
+                <p class="edit-response-message"></p>
+            </form>
+            `
+            : `
+            <p class="c-response-content">${escapeHTML(response.content)}</p>
+            `
+        }
 
         <div class="c-response-footer">
             <details class="reply-details">

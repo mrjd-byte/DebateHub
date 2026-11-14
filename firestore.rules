@@ -104,6 +104,48 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
     }
+
+    // Subcollection: responses under arguments
+    match /debates/{debateId}/arguments/{argumentId}/responses/{responseId} {
+      // Public users can read responses
+      allow read: if true;
+
+      // Authenticated users can create responses
+      // authorId must match request.auth.uid
+      // Parent debate and argument must exist
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.debateId == debateId
+        && request.resource.data.argumentId == argumentId
+        && exists(/databases/$(database)/documents/debates/$(debateId))
+        && exists(/databases/$(database)/documents/debates/$(debateId)/arguments/$(argumentId))
+        && request.resource.data.keys().hasAll([
+          'content', 'authorId', 'debateId', 'argumentId', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'content', 'authorId', 'debateId', 'argumentId', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+
+      // Only the original author can update their response
+      // Ownership and parent relationships cannot be changed
+      allow update: if request.auth != null
+        && resource.data.authorId == request.auth.uid
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.debateId == resource.data.debateId
+        && request.resource.data.argumentId == resource.data.argumentId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['authorId', 'debateId', 'argumentId', 'createdAt'])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.updatedAt is timestamp;
+
+      // Only the original author can delete their response
+      allow delete: if request.auth != null
+        && resource.data.authorId == request.auth.uid;
+    }
   }
 }
 

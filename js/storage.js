@@ -34,6 +34,7 @@ export function loadState() {
         };
         state.debatesLoading = true;
         state.argumentsLoading = false;
+        state.responsesLoading = false;
         state.appData.users = (state.appData.users || []).map(
             ({ password, ...user }) => user
         );
@@ -42,6 +43,7 @@ export function loadState() {
         // Never restore edit mode after reloading the application.
         state.navigation.editingDebateId = null;
         state.navigation.editingArgumentId = null;
+        state.navigation.editingResponseId = null;
 
         saveState();
 
