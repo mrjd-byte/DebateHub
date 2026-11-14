@@ -13,7 +13,17 @@ function escapeHTML(value) {
 }
 
 function formatTime(createdAt) {
-    const diff = Date.now() - new Date(createdAt).getTime();
+    const time = createdAt?.toDate ? createdAt.toDate().getTime() : new Date(createdAt).getTime();
+
+    if (!time || isNaN(time)) {
+        return "Just now";
+    }
+
+    const diff = Date.now() - time;
+
+    if (diff < 0) {
+        return "Just now";
+    }
 
     const seconds = Math.floor(diff / 1000);
 
@@ -61,7 +71,13 @@ export function renderHome() {
             <h2 class="section-title">Available Debates</h2>
 
             <div class="debates-list">
-                ${debates.length === 0
+                ${state.debatesLoading && debates.length === 0
+                ? `
+                    <div class="empty-state">
+                        <p>Loading debates...</p>
+                    </div>
+                `
+                : debates.length === 0
                 ? `
                     <div class="empty-state">
                         <p>No debates yet.</p>
@@ -97,21 +113,23 @@ export function renderLogin() {
 
             <label>
                 Email
-                <input type="email" id="login-email">
+                <input type="email" id="login-email" required>
             </label>
 
             <label>
                 Phone
-                <input type="tel" id="login-phone">
+                <input type="tel" id="login-phone" disabled>
+                <small>Phone sign-in is not available yet.</small>
             </label>
 
             <label>
                 Password
-                <input type="password" id="login-password">
+                <input type="password" id="login-password" required>
             </label>
 
             <button type="submit">Login</button>
 
+            ${state.auth.error ? `<p role="alert">${escapeHTML(state.auth.error)}</p>` : ""}
             <p id="login-message"></p>
 
         </form>
@@ -122,6 +140,7 @@ export function renderProfile() {
     const user = state.auth.currentUser;
     return `
         <h1>Profile</h1>
+        ${state.auth.error ? `<p role="alert">${escapeHTML(state.auth.error)}</p>` : ""}
         <p>Username: ${escapeHTML(user.username)}</p>
         <p>
             ${user.email
@@ -151,21 +170,23 @@ export function renderRegister() {
 
             <label>
                 Email
-                <input type="email" id="email">
+                <input type="email" id="email" required>
             </label>
 
             <label>
                 Phone
-                <input type="tel" id="phone">
+                <input type="tel" id="phone" disabled>
+                <small>Phone sign-in is not available yet.</small>
             </label>
 
             <label>
                 Password
-                <input type="password" id="password">
+                <input type="password" id="password" minlength="6" required>
             </label>
 
             <button type="submit">Register</button>
 
+            ${state.auth.error ? `<p role="alert">${escapeHTML(state.auth.error)}</p>` : ""}
             <p id="register-message"></p>
 
         </form>
@@ -367,6 +388,13 @@ export function renderDebate(debateId) {
     );
 
     if (!debate) {
+        if (state.debatesLoading) {
+            return `
+                <div class="empty-state">
+                    <p>Loading debate...</p>
+                </div>
+            `;
+        }
         return `
             <div class="empty-state">
                 <h1>Debate Not Found</h1>
@@ -429,6 +457,7 @@ export function renderDebate(debateId) {
                             <button type="submit">Save Changes</button>
                             <button type="button" id="cancel-edit">Cancel</button>
                         </div>
+                        <p id="edit-debate-message"></p>
                     </form>
                     `
                     : `

@@ -1,8 +1,12 @@
 export const state = {
 
+    debatesLoading: true,
+
     auth: {
+        status: "loading",
         isAuthenticated: false,
-        currentUser: null
+        currentUser: null,
+        error: null
     },
 
     navigation: {

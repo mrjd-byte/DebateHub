@@ -12,6 +12,14 @@ import {
 } from "./ui.js";
 
 function requireAuth(view) {
+    if (state.auth.status === "loading") {
+        return `<div class="empty-state"><p>Restoring your session…</p></div>`;
+    }
+
+    if (state.auth.status === "error" && !state.auth.isAuthenticated) {
+        return `<div class="empty-state"><p>${state.auth.error || "Unable to determine your session."}</p><a href="/login" data-link>Go to login</a></div>`;
+    }
+
     if (!state.auth.isAuthenticated) {
         return renderLogin();
     }

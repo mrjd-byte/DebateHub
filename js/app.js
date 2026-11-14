@@ -1,10 +1,8 @@
 import { router } from "./router.js";
 import { loadState } from "./storage.js";
-import { registerUser } from "./auth.js";
-import { loginUser } from "./auth.js";
+import { registerUser, loginUser, logoutUser, subscribeToAuthChanges } from "./auth.js";
 import { renderNavbar } from "./ui.js";
-import { logoutUser } from "./auth.js";
-import {createDebate, updateDebate, deleteDebate} from "./debates.js";
+import {createDebate, updateDebate, deleteDebate, fetchDebates} from "./debates.js";
 import { setPosition } from "./positions.js";
 import { createArgument, updateArgument } from "./arguments.js";
 import { voteOnArgument, voteOnResponse } from "./votes.js";
@@ -18,7 +16,7 @@ function render() {
     app.innerHTML = router();
 }
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
 
     const link = event.target.closest("[data-link]");
 
@@ -34,7 +32,11 @@ document.addEventListener("click", (event) => {
     }
 
     if (event.target.id === "logout-button") {
-        logoutUser();
+        const result = await logoutUser();
+        if (!result.success) {
+            window.alert(result.message);
+            return;
+        }
 
         window.history.pushState({}, "", "/");
         render();
@@ -122,12 +124,16 @@ if (deleteButton) {
         return;
     }
 
-    const result = deleteDebate(debateId);
+    deleteButton.disabled = true;
+
+    const result = await deleteDebate(debateId);
 
     console.log("Delete result:", result);
 
     if (!result.success) {
-        console.log(result.message);
+        deleteButton.disabled = false;
+        console.error(result.message);
+        window.alert(result.message);
         return;
     }
 
@@ -162,7 +168,7 @@ if (event.target.closest(".cancel-edit-argument")) {
 
 });
 
-document.addEventListener("submit", (event) => {
+document.addEventListener("submit", async (event) => {
 
     if (event.target.id === "register-form") {
         event.preventDefault();
@@ -171,13 +177,11 @@ document.addEventListener("submit", (event) => {
 
         const username = document.querySelector("#username").value.trim();
         const email = form.querySelector("#email").value.trim();
-        const phone = form.querySelector("#phone").value.trim();
         const password = form.querySelector("#password").value;
 
-        const result = registerUser({
+        const result = await registerUser({
             username,
             email,
-            phone,
             password
         });
 
@@ -188,7 +192,8 @@ document.addEventListener("submit", (event) => {
             return;
         }
 
-        message.textContent = "Registration successful!";
+        window.history.pushState({}, "", "/");
+        render();
     }
 
 
@@ -200,12 +205,10 @@ document.addEventListener("submit", (event) => {
         const form = event.target;
 
         const email = form.querySelector("#login-email").value.trim();
-        const phone = form.querySelector("#login-phone").value.trim();
         const password = form.querySelector("#login-password").value;
 
-        const result = loginUser({
+        const result = await loginUser({
             email,
-            phone,
             password
         });
 
@@ -238,17 +241,22 @@ document.addEventListener("submit", (event) => {
             .map(tag => tag.trim())
             .filter(tag => tag !== "");
 
-        const result = createDebate({
+        const submitBtn = form.querySelector("button[type='submit']");
+        const message = document.querySelector("#debate-message");
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (message) message.textContent = "Creating debate...";
+
+        const result = await createDebate({
             title,
             description,
             topic,
             tags
         });
 
-        const message = document.querySelector("#debate-message");
-
         if (!result.success) {
-            message.textContent = result.message;
+            if (submitBtn) submitBtn.disabled = false;
+            if (message) message.textContent = result.message;
             return;
         }
 
@@ -341,7 +349,13 @@ document.addEventListener("submit", (event) => {
 
     const debateId = state.navigation.editingDebateId;
 
-    const result = updateDebate(debateId, {
+    const submitBtn = form.querySelector("button[type='submit']");
+    const message = form.querySelector("#edit-debate-message");
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (message) message.textContent = "Saving changes...";
+
+    const result = await updateDebate(debateId, {
         title,
         description,
         topic,
@@ -349,6 +363,12 @@ document.addEventListener("submit", (event) => {
     });
 
     if (!result.success) {
+        if (submitBtn) submitBtn.disabled = false;
+        if (message) {
+            message.textContent = result.message;
+        } else {
+            window.alert(result.message);
+        }
         console.log(result.message);
         return;
     }
@@ -404,8 +424,12 @@ window.addEventListener("popstate", () => {
 });
 
 loadState();
-
 render();
+subscribeToAuthChanges(render);
+
+fetchDebates().then(() => {
+    render();
+});
 
 //[data-link] is a CSS selector meaning: Find an element that has a data-link attribute.
 //event.target is the elemnet that was actually clicked
